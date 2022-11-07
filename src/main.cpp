@@ -25,6 +25,8 @@
 #include "driver/ledc.h"
 #include "soc/gpio_sig_map.h"
 #include "soc/pcnt_reg.h"
+#include "soc/pcnt_struct.h"
+#include "driver/periph_ctrl.h"
 
 using namespace rb;
 
@@ -91,15 +93,38 @@ static void initGridUi() {
     // Commit the layout. Beyond this point, calling any builder methods on the UI is invalid.
     builder.commit();
 }
+extern "C"{
+    static void ledc_init(void){
+    // Prepare and then apply the LEDC PWM timer configuration
+    periph_module_enable(PERIPH_LEDC_MODULE);
+    ledc_timer_config_t ledc_timer;
+    ledc_timer.speed_mode       = LEDC_HIGH_SPEED_MODE;
+    ledc_timer.timer_num        = LEDC_TIMER_1;
+    ledc_timer.duty_resolution  = LEDC_TIMER_10_BIT;
+    ledc_timer.freq_hz          = 35000;  // set output frequency at 1 Hz
+    ledc_timer.clk_cfg = LEDC_USE_APB_CLK;
+    ledc_timer_config(&ledc_timer);
 
+    // Prepare and then apply the LEDC PWM channel configuration
+    ledc_channel_config_t ledc_channel;
+    ledc_channel.speed_mode = LEDC_HIGH_SPEED_MODE;
+    ledc_channel.channel    = LEDC_CHANNEL_1;
+    ledc_channel.timer_sel  = LEDC_TIMER_1;
+    ledc_channel.intr_type  = LEDC_INTR_FADE_END;
+    ledc_channel.gpio_num   = LEDC_OUTPUT_IO;
+    ledc_channel.duty       = 512; // set duty at about 50%
+    ledc_channel.hpoint     = 0;
+    ledc_channel_config(&ledc_channel);
+}
+}
 static void initDriver(Driver& driver, const int iRun, const int iHold) {
     driver.init();
     vTaskDelay(100 / portTICK_PERIOD_MS);   
     uint32_t data =0;
 
-    uint32_t position;
+   /* uint32_t position;
     driver.get_MSCNT(position);
-    printf("POCATECNI POZICE MOTORU %d\n", position);
+    printf("POCATECNI POZICE MOTORU %d\n", position);*/
 
     int result = driver.get_PWMCONF(data);
     if (result != 0)
@@ -129,8 +154,7 @@ extern "C" void app_main(void)
     gpio_set_level(VCC_IO_1, 1); // zapnuti napajeni do driveru1
     gpio_set_level(VCC_IO_2, 1); // zapnuti napajeni do driveru2
     gpio_set_level(VCC_IO_3, 1); // zapnuti napajeni do driveru3
-    gpio_set_level(GPIO_NUM_32, 1);
-     // zapnuti siloveho napajeni do driveru
+    gpio_set_level(GPIO_NUM_32, 1);// zapnuti siloveho napajeni do driveru
     printf("Zapnuti driveru\n");
     printf("Simple Motor \n\tbuild %s %s\n", __DATE__, __TIME__);
     check_reset();
@@ -180,26 +204,29 @@ extern "C" void app_main(void)
     Driver driver0 { drivers_uart, DRIVER_0_ADDRES, DRIVER_0_ENABLE };
     initDriver(driver0, 16, 0);
     driver0.get_MSCNT(position0);
-    driver0.set_speed(motor_speed0);
+   // driver0.set_speed(motor_speed0);
     vTaskDelay(200/portTICK_PERIOD_MS);
     Driver driver1 { drivers_uart, DRIVER_1_ADDRES, DRIVER_1_ENABLE };
     initDriver(driver1, 16, 0); 
-    driver1.set_speed(motor_speed1);
+  //  driver1.set_speed(motor_speed1);
     driver1.get_MSCNT(position1);
     vTaskDelay(200/portTICK_PERIOD_MS);
     Driver driver2 { drivers_uart, DRIVER_2_ADDRES, DRIVER_2_ENABLE };
     initDriver(driver2, 16, 0);
-    driver2.set_speed(motor_speed2);
+   // driver2.set_speed(motor_speed2);
     driver2.get_MSCNT(position2);
     vTaskDelay(200/portTICK_PERIOD_MS);
     Driver driver3 { drivers_uart, DRIVER_3_ADDRES, DRIVER_3_ENABLE };
     initDriver(driver3, 16, 0);
     driver3.get_MSCNT(position3);
-    driver3.set_speed(motor_speed3);
+  //  driver3.set_speed(motor_speed3);
     vTaskDelay(200/portTICK_PERIOD_MS);
+
+    ledc_init(); //zapnuti STEP pulzů
+    gpio_set_level(DIR_OUTPUT, 1); //DIR
+
 	/*
 	bool otevrena_celist = 0;
-
     while(1){ 
         if (gpio_get_level(KONCOVY_DOJEZD_0)*motor_speed2!=0)   //kontroluje optozavory (aktivovana = 1, deaktivovana = 0)
         {
@@ -276,13 +303,13 @@ extern "C" void app_main(void)
 		}
         vTaskDelay(5/portTICK_PERIOD_MS);    
 */
-        driver0.set_speed(motor_speed0);
+      //  driver0.set_speed(motor_speed0);
      //   vTaskDelay(50/portTICK_PERIOD_MS);
-        driver1.set_speed(motor_speed1);
+     //   driver1.set_speed(motor_speed1);
      //   vTaskDelay(50/portTICK_PERIOD_MS);
-        driver2.set_speed(motor_speed2);
+     //   driver2.set_speed(motor_speed2);
      //   vTaskDelay(50/portTICK_PERIOD_MS);
-        driver3.set_speed(motor_speed3);
+    //    driver3.set_speed(motor_speed3);
         vTaskDelay(5/portTICK_PERIOD_MS);
 
     

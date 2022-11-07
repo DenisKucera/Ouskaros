@@ -33,6 +33,9 @@
 #define PCNT_INPUT_SIG_IO3     // Pulse Input GPIO
 #define PCNT_INPUT_CTRL_IO  5  // Control GPIO HIGH=count up, LOW=count down*/
 
+#define LEDC_OUTPUT_IO      GPIO_NUM_5  //inicializace STEP pinu
+#define DIR_OUTPUT          GPIO_NUM_4  //inicializace DIR pinu
+
 #define GPIO_BIT_MASK_INPUTS ((1ULL<<KONCOVY_DOJEZD_0) | (1ULL<<KONCOVY_DOJEZD_1) | (1ULL<<KONCOVY_DOJEZD_2) | (1ULL<<KONCOVY_DOJEZD_3))
 
 #define DRIVERS_UART              UART_NUM_1
