@@ -197,7 +197,7 @@ extern "C" void app_main(void)
     driver3.get_MSCNT(position3);
     driver3.set_speed(motor_speed3);
     vTaskDelay(200/portTICK_PERIOD_MS);
-	
+	/*
 	bool otevrena_celist = 0;
 
     while(1){ 
@@ -275,7 +275,7 @@ extern "C" void app_main(void)
 			otevrena_celist = 0;
 		}
         vTaskDelay(5/portTICK_PERIOD_MS);    
-
+*/
         driver0.set_speed(motor_speed0);
      //   vTaskDelay(50/portTICK_PERIOD_MS);
         driver1.set_speed(motor_speed1);
@@ -285,7 +285,7 @@ extern "C" void app_main(void)
         driver3.set_speed(motor_speed3);
         vTaskDelay(5/portTICK_PERIOD_MS);
 
-    }
+    
 }
 
 
