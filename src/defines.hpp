@@ -35,6 +35,15 @@
 
 #define LEDC_OUTPUT_IO      GPIO_NUM_5  //inicializace STEP pinu
 #define DIR_OUTPUT          GPIO_NUM_4  //inicializace DIR pinu
+#define PCNT_TEST_UNIT      PCNT_UNIT_0
+#define PCNT_INPUT_0        GPIO_NUM_12
+#define PCNT_INPUT_1        GPIO_NUM_13
+#define PCNT_INPUT_2        GPIO_NUM_15
+#define PCNT_INPUT_3        GPIO_NUM_18
+#define PCNT_H_LIM_VAL      16960
+#define PCNT_L_LIM_VAL     -16960
+#define PCNT_THRESH1_VAL    16960
+#define PCNT_THRESH0_VAL   -16960
 
 #define GPIO_BIT_MASK_INPUTS ((1ULL<<KONCOVY_DOJEZD_0) | (1ULL<<KONCOVY_DOJEZD_1) | (1ULL<<KONCOVY_DOJEZD_2) | (1ULL<<KONCOVY_DOJEZD_3))
 
