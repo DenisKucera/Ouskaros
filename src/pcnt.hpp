@@ -87,9 +87,13 @@ static void pcnt_example_init(void)
     /* Prepare configuration for the PCNT unit */
         pcnt_config_t pcnt_config;
         // Set PCNT input signal and control GPIOs
-        pcnt_config.pulse_gpio_num = PCNT_INPUT_0;
+        pcnt_config.pulse_gpio_num = PCNT_INPUT_1;
+       // pcnt_config.pulse_gpio_num = PCNT_INPUT_1;
+       // pcnt_config.pulse_gpio_num = PCNT_INPUT_2;
+       // pcnt_config.pulse_gpio_num = PCNT_INPUT_3;
         //.ctrl_gpio_num = PCNT_INPUT_CTRL_IO,
         pcnt_config.channel = PCNT_CHANNEL_0;
+        //pcnt_config.channel = PCNT_CHANNEL_1;
         pcnt_config.unit = PCNT_TEST_UNIT;
         // What to do on the positive / negative edge of pulse input?
         pcnt_config.pos_mode = PCNT_COUNT_INC;   // Count up on the positive edge
