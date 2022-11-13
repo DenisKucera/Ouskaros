@@ -100,9 +100,9 @@ static void initDriver(Driver& driver, const int iRun, const int iHold) {
     vTaskDelay(100 / portTICK_PERIOD_MS);   
     uint32_t data =0;
 
-   /* uint32_t position;
+    uint32_t position;
     driver.get_MSCNT(position);
-    printf("POCATECNI POZICE MOTORU %d\n", position);*/
+    printf("POCATECNI POZICE MOTORU %d\n", position);
 
     int result = driver.get_PWMCONF(data);
     if (result != 0)
@@ -119,7 +119,7 @@ static void initDriver(Driver& driver, const int iRun, const int iHold) {
     vTaskDelay(100 / portTICK_PERIOD_MS);
     
     driver.set_speed(0);                      // otáčení motoru se nastavuje zápisem rychlosti do driveru přes Uart
-    driver.set_IHOLD_IRUN (16, 8);             // proud IHOLD (při stání) =8/32, IRUN (při běhu)= 8/32 (8/32 je minimum, 16/32 je maximum pro dluhodobější provoz)
+    driver.set_IHOLD_IRUN (16, 32);             // proud IHOLD (při stání) =8/32, IRUN (při běhu)= 8/32 (8/32 je minimum, 16/32 je maximum pro dluhodobější provoz)
     driver.enable();                          //zapnutí mptoru
     vTaskDelay(300 / portTICK_PERIOD_MS);     //doba stání pro nastavení automatiky driveru
     driver.set_IHOLD_IRUN (iRun, iHold);             //proud IHOLD =0, IRUN = 8/32 (při stání je motor volně otočný)
@@ -181,22 +181,22 @@ extern "C" void app_main(void)
  
     Driver driver0 { drivers_uart, DRIVER_0_ADDRES, DRIVER_0_ENABLE };
     initDriver(driver0, 32, 32);
-  //  driver0.get_MSCNT(position0);
+    driver0.get_MSCNT(position0);
     driver0.set_speed(motor_speed0);
     vTaskDelay(200/portTICK_PERIOD_MS);
     Driver driver1 { drivers_uart, DRIVER_1_ADDRES, DRIVER_1_ENABLE };
     initDriver(driver1, 32, 32); 
     driver1.set_speed(motor_speed1);
- //   driver1.get_MSCNT(position1);
+    driver1.get_MSCNT(position1);
     vTaskDelay(200/portTICK_PERIOD_MS);
     Driver driver2 { drivers_uart, DRIVER_2_ADDRES, DRIVER_2_ENABLE };
     initDriver(driver2, 32, 32);
     driver2.set_speed(motor_speed2);
-  //  driver2.get_MSCNT(position2);
+    driver2.get_MSCNT(position2);
     vTaskDelay(200/portTICK_PERIOD_MS);
     Driver driver3 { drivers_uart, DRIVER_3_ADDRES, DRIVER_3_ENABLE };
     initDriver(driver3, 32, 32);
-  //  driver3.get_MSCNT(position3);
+    driver3.get_MSCNT(position3);
     driver3.set_speed(motor_speed3);
     vTaskDelay(200/portTICK_PERIOD_MS);
 
@@ -292,12 +292,24 @@ extern "C" void app_main(void)
         vTaskDelay(5/portTICK_PERIOD_MS);
         driver3.set_speed(motor_speed3);
         vTaskDelay(5/portTICK_PERIOD_MS);
+        driver0.get_MSCNT(position0);
+        printf("POZICE MOTORU0 %d\n", position0);
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        driver1.get_MSCNT(position1);
+        printf("POZICE MOTORU1 %d\n", position1);
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        driver2.get_MSCNT(position2);
+        printf("POZICE MOTORU2 %d\n", position2);
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        driver3.get_MSCNT(position3);
+        printf("POZICE MOTORU3 %d\n", position3);
+        vTaskDelay(5/portTICK_PERIOD_MS);
       /* pcnt();
         printf("pocet pulzu: %d\n",pcnt0_count);
         vTaskDelay(1000/portTICK_PERIOD_MS);*/
         printf("pocet pulzu: %d\n",pcnt0_count);
-        printf("procesor: %d\n", xPortGetCoreID());
-        vTaskDelay(1000/portTICK_PERIOD_MS);
+       // printf("procesor: %d\n", xPortGetCoreID());
+        vTaskDelay(2000/portTICK_PERIOD_MS);
     }
 }
 
