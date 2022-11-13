@@ -180,23 +180,23 @@ extern "C" void app_main(void)
     };
  
     Driver driver0 { drivers_uart, DRIVER_0_ADDRES, DRIVER_0_ENABLE };
-    initDriver(driver0, 16, 0);
-    driver0.get_MSCNT(position0);
+    initDriver(driver0, 32, 32);
+  //  driver0.get_MSCNT(position0);
     driver0.set_speed(motor_speed0);
     vTaskDelay(200/portTICK_PERIOD_MS);
     Driver driver1 { drivers_uart, DRIVER_1_ADDRES, DRIVER_1_ENABLE };
-    initDriver(driver1, 16, 0); 
+    initDriver(driver1, 32, 32); 
     driver1.set_speed(motor_speed1);
-    driver1.get_MSCNT(position1);
+ //   driver1.get_MSCNT(position1);
     vTaskDelay(200/portTICK_PERIOD_MS);
     Driver driver2 { drivers_uart, DRIVER_2_ADDRES, DRIVER_2_ENABLE };
-    initDriver(driver2, 16, 0);
+    initDriver(driver2, 32, 32);
     driver2.set_speed(motor_speed2);
-    driver2.get_MSCNT(position2);
+  //  driver2.get_MSCNT(position2);
     vTaskDelay(200/portTICK_PERIOD_MS);
     Driver driver3 { drivers_uart, DRIVER_3_ADDRES, DRIVER_3_ENABLE };
-    initDriver(driver3, 16, 0);
-    driver3.get_MSCNT(position3);
+    initDriver(driver3, 32, 32);
+  //  driver3.get_MSCNT(position3);
     driver3.set_speed(motor_speed3);
     vTaskDelay(200/portTICK_PERIOD_MS);
 
@@ -279,18 +279,25 @@ extern "C" void app_main(void)
 		{
 			otevrena_celist = 0;
 		}
-        vTaskDelay(5/portTICK_PERIOD_MS);  */  
+        vTaskDelay(5/portTICK_PERIOD_MS);  */
+    TaskHandle_t  pulse_count;
+    xTaskCreatePinnedToCore(pulse,"pulse counter",10000,NULL,1,&pulse_count,1); 
+    vTaskDelay(1/portTICK_PERIOD_MS);  
     while(1){
         driver0.set_speed(motor_speed0);
-        vTaskDelay(50/portTICK_PERIOD_MS);
+        vTaskDelay(5/portTICK_PERIOD_MS);
         driver1.set_speed(motor_speed1);
-        vTaskDelay(50/portTICK_PERIOD_MS);
+        vTaskDelay(5/portTICK_PERIOD_MS);
         driver2.set_speed(motor_speed2);
-        vTaskDelay(50/portTICK_PERIOD_MS);
+        vTaskDelay(5/portTICK_PERIOD_MS);
         driver3.set_speed(motor_speed3);
         vTaskDelay(5/portTICK_PERIOD_MS);
-        pcnt();
-        vTaskDelay(5/portTICK_PERIOD_MS);
+      /* pcnt();
+        printf("pocet pulzu: %d\n",pcnt0_count);
+        vTaskDelay(1000/portTICK_PERIOD_MS);*/
+        printf("pocet pulzu: %d\n",pcnt0_count);
+        printf("procesor: %d\n", xPortGetCoreID());
+        vTaskDelay(1000/portTICK_PERIOD_MS);
     }
 }
 
