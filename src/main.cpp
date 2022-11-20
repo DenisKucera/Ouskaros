@@ -199,10 +199,10 @@ extern "C" void app_main(void)
     driver3.get_MSCNT(position3);
     driver3.set_speed(motor_speed3);
     vTaskDelay(200/portTICK_PERIOD_MS);
-
-   // ledc_init(); //zapnuti STEP pulzů
-   // gpio_set_level(DIR_OUTPUT, 1); //DIR
-   // pcnt();
+    
+    ledc_init(); //zapnuti STEP pulzů
+    gpio_set_level(DIR_OUTPUT0, 1);  //DIR
+    //pcnt();
 	/*
 	bool otevrena_celist = 0;
      
@@ -284,6 +284,14 @@ extern "C" void app_main(void)
     xTaskCreatePinnedToCore(pulse,"pulse counter",10000,NULL,1,&pulse_count,1); 
     vTaskDelay(1/portTICK_PERIOD_MS);  
     while(1){
+        printf("KONCOVY_DOJEZD_0 %d\n", gpio_get_level(KONCOVY_DOJEZD_0));
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        printf("KONCOVY_DOJEZD_1 %d\n", gpio_get_level(KONCOVY_DOJEZD_1));
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        printf("KONCOVY_DOJEZD_2 %d\n", gpio_get_level(KONCOVY_DOJEZD_2));
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        printf("KONCOVY_DOJEZD_3 %d\n", gpio_get_level(KONCOVY_DOJEZD_3));
+        vTaskDelay(5/portTICK_PERIOD_MS);
         driver0.set_speed(motor_speed0);
         vTaskDelay(5/portTICK_PERIOD_MS);
         driver1.set_speed(motor_speed1);
@@ -308,7 +316,11 @@ extern "C" void app_main(void)
         printf("pocet pulzu: %d\n",pcnt0_count);
         vTaskDelay(1000/portTICK_PERIOD_MS);*/
         printf("pocet pulzu: %d\n",pcnt0_count);
+        vTaskDelay(5/portTICK_PERIOD_MS);
        // printf("procesor: %d\n", xPortGetCoreID());
+        if(gpio_get_level(KONCOVY_DOJEZD_0)){
+            ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
+        }
         vTaskDelay(2000/portTICK_PERIOD_MS);
     }
 }

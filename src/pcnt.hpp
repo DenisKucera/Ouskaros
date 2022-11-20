@@ -66,7 +66,7 @@ extern "C"{
     ledc_timer.speed_mode       = LEDC_HIGH_SPEED_MODE;
     ledc_timer.timer_num        = LEDC_TIMER_1;
     ledc_timer.duty_resolution  = LEDC_TIMER_10_BIT;
-    ledc_timer.freq_hz          = 10000;  // set output frequency at 10000 Hz
+    ledc_timer.freq_hz          = 30000;  // set output frequency at 10000 Hz
     ledc_timer.clk_cfg = LEDC_USE_APB_CLK;
     ledc_timer_config(&ledc_timer);
 
@@ -76,7 +76,7 @@ extern "C"{
     ledc_channel.channel    = LEDC_CHANNEL_1;
     ledc_channel.timer_sel  = LEDC_TIMER_1;
     ledc_channel.intr_type  = LEDC_INTR_FADE_END;
-    ledc_channel.gpio_num   = LEDC_OUTPUT_IO;
+    ledc_channel.gpio_num   = LEDC_OUTPUT_IO0;
     ledc_channel.duty       = 512; // set duty at about 50%
     ledc_channel.hpoint     = 0;
     ledc_channel_config(&ledc_channel);
