@@ -200,8 +200,14 @@ extern "C" void app_main(void)
     driver3.set_speed(motor_speed3);
     vTaskDelay(200/portTICK_PERIOD_MS);
     
-    ledc_init(); //zapnuti STEP pulzů
+    ledc_init0(); //zapnuti STEP pulzů
+   // ledc_init1();
+   // ledc_init2();
+  //  ledc_init3();
     gpio_set_level(DIR_OUTPUT0, 1);  //DIR
+    gpio_set_level(DIR_OUTPUT1, 1);  //DIR
+    gpio_set_level(DIR_OUTPUT2, 1);  //DIR
+    gpio_set_level(DIR_OUTPUT3, 1);  //DIR
     //pcnt();
 	/*
 	bool otevrena_celist = 0;
@@ -319,7 +325,7 @@ extern "C" void app_main(void)
         vTaskDelay(5/portTICK_PERIOD_MS);
        // printf("procesor: %d\n", xPortGetCoreID());
         if(gpio_get_level(KONCOVY_DOJEZD_0)){
-            ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
+            ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
         }
         vTaskDelay(2000/portTICK_PERIOD_MS);
     }
