@@ -128,13 +128,13 @@ static void initDriver(Driver& driver, const int iRun, const int iHold) {
 
 extern "C" void app_main(void)
 {   
-    gpio_set_level(VCC_IO_0, 1); // zapnuti napajeni do driveru0 
-    gpio_set_level(VCC_IO_1, 1); // zapnuti napajeni do driveru1
-    gpio_set_level(VCC_IO_2, 1); // zapnuti napajeni do driveru2
-    gpio_set_level(VCC_IO_3, 1); // zapnuti napajeni do driveru3
+    gpio_set_level(VCC_IO, 1); // zapnuti napajeni do driveru(vsechny) 
+   // gpio_set_level(VCC_IO_1, 1); // zapnuti napajeni do driveru1
+   // gpio_set_level(VCC_IO_2, 1); // zapnuti napajeni do driveru2
+   // gpio_set_level(VCC_IO_3, 1); // zapnuti napajeni do driveru3
     gpio_set_level(GPIO_NUM_32, 1);// zapnuti siloveho napajeni do driveru
     printf("Zapnuti driveru\n");
-    printf("Simple Motor \n\tbuild %s %s\n", __DATE__, __TIME__);
+    printf("Ouskaros jedem!!!!!! \n\tbuild %s %s\n", __DATE__, __TIME__);
     check_reset();
     iopins_init();
     //optozávory inicializace
@@ -144,15 +144,15 @@ extern "C" void app_main(void)
     io_conf.intr_type = GPIO_INTR_DISABLE;
     gpio_config(&io_conf);
 
-    gpio_set_level(VCC_IO_0, 0);              // reset driveru
-    gpio_set_level(VCC_IO_1, 0);
-    gpio_set_level(VCC_IO_2, 0);
-    gpio_set_level(VCC_IO_3, 0);
+    gpio_set_level(VCC_IO, 0);              // reset driveru
+   // gpio_set_level(VCC_IO_1, 0);
+   // gpio_set_level(VCC_IO_2, 0);
+   // gpio_set_level(VCC_IO_3, 0);
     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    gpio_set_level(VCC_IO_0, 1);              //zapíná VCCIO driveru
-    gpio_set_level(VCC_IO_1, 1);
-    gpio_set_level(VCC_IO_2, 1);
-    gpio_set_level(VCC_IO_3, 1);
+    gpio_set_level(VCC_IO, 1);              //zapíná VCCIO driveru
+   // gpio_set_level(VCC_IO_1, 1);
+   // gpio_set_level(VCC_IO_2, 1);
+   // gpio_set_level(VCC_IO_3, 1);
     nvs_init();                             //inicializace pro zápis do flash paměti
     initGridUi();
     Uart drivers_uart {
@@ -200,10 +200,7 @@ extern "C" void app_main(void)
     driver3.set_speed(motor_speed3);
     vTaskDelay(200/portTICK_PERIOD_MS);
     
-    ledc_init0(); //zapnuti STEP pulzů
-   // ledc_init1();
-   // ledc_init2();
-  //  ledc_init3();
+    ledc_init(); //zapnuti STEP pulzů
     gpio_set_level(DIR_OUTPUT0, 1);  //DIR
     gpio_set_level(DIR_OUTPUT1, 1);  //DIR
     gpio_set_level(DIR_OUTPUT2, 1);  //DIR
@@ -324,10 +321,19 @@ extern "C" void app_main(void)
         printf("pocet pulzu: %d\n",pcnt0_count);
         vTaskDelay(5/portTICK_PERIOD_MS);
        // printf("procesor: %d\n", xPortGetCoreID());
-        if(gpio_get_level(KONCOVY_DOJEZD_0)){
+        if(gpio_get_level(KONCOVY_DOJEZD_1)){
             ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
         }
-        vTaskDelay(2000/portTICK_PERIOD_MS);
+        if(gpio_get_level(KONCOVY_DOJEZD_0)){
+            ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_3, 0);
+        }
+        if(gpio_get_level(KONCOVY_DOJEZD_2)){
+            ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_2, 0);
+        }
+       /* if(gpio_get_level(KONCOVY_DOJEZD_3)){
+            ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
+        }*/
+        vTaskDelay(100/portTICK_PERIOD_MS);
     }
 }
 

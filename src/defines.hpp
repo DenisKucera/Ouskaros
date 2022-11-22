@@ -10,10 +10,10 @@
 #define DRIVER_2_ENABLE           GPIO_NUM_23
 #define DRIVER_3_ENABLE           GPIO_NUM_23
 
-#define VCC_IO_0                  GPIO_NUM_33  // L = reset driver 0, H = driver0 on
-#define VCC_IO_1                  GPIO_NUM_25  // L = reset driver 0, H = driver0 on
-#define VCC_IO_2                  GPIO_NUM_26  // L = reset driver 0, H = driver0 on
-#define VCC_IO_3                  GPIO_NUM_27  // L = reset driver 0, H = driver0 on
+#define VCC_IO                  GPIO_NUM_33  // L = reset driver 0, H = driver0 on
+//#define VCC_IO_1                  GPIO_NUM_33  // L = reset driver 0, H = driver0 on
+//#define VCC_IO_2                  GPIO_NUM_33  // L = reset driver 0, H = driver0 on
+//#define VCC_IO_3                  GPIO_NUM_33  // L = reset driver 0, H = driver0 on
 
 #define SW_CTRL                   GPIO_NUM_32  // L = transistor Q3 off -> motor power off, H = all drivers on
 
@@ -33,14 +33,14 @@
 #define PCNT_INPUT_SIG_IO3     // Pulse Input GPIO
 #define PCNT_INPUT_CTRL_IO  5  // Control GPIO HIGH=count up, LOW=count down*/
 
-#define LEDC_OUTPUT_IO0      GPIO_NUM_5  //inicializace STEP pinu
-#define DIR_OUTPUT0          GPIO_NUM_4  //inicializace DIR pinu
-#define LEDC_OUTPUT_IO1      GPIO_NUM_1  //inicializace STEP pinu
-#define DIR_OUTPUT1          GPIO_NUM_0  //inicializace DIR pinu
-#define LEDC_OUTPUT_IO2      GPIO_NUM_3  //inicializace STEP pinu
-#define DIR_OUTPUT2          GPIO_NUM_2  //inicializace DIR pinu
-#define LEDC_OUTPUT_IO3      GPIO_NUM_7  //inicializace STEP pinu
-#define DIR_OUTPUT3          GPIO_NUM_10  //inicializace DIR pinu
+#define LEDC_OUTPUT_IO0     GPIO_NUM_5  //inicializace STEP pinu
+#define DIR_OUTPUT0         GPIO_NUM_4  //inicializace DIR pinu
+#define LEDC_OUTPUT_IO1      GPIO_NUM_26  //inicializace STEP pinu
+#define DIR_OUTPUT1         GPIO_NUM_21  //inicializace DIR pinu
+#define LEDC_OUTPUT_IO2      GPIO_NUM_27  //inicializace STEP pinu
+#define DIR_OUTPUT2         GPIO_NUM_2  //inicializace DIR pinu
+#define LEDC_OUTPUT_IO3      GPIO_NUM_14  //inicializace STEP pinu
+#define DIR_OUTPUT3         GPIO_NUM_19  //inicializace DIR pinu
 #define PCNT_TEST_UNIT      PCNT_UNIT_0
 #define PCNT_INPUT_0        GPIO_NUM_12
 #define PCNT_INPUT_1        GPIO_NUM_13
@@ -61,7 +61,7 @@ volatile int pcnt0_count = 0;
 #define DRIVERS_RX_TIMEOUT        (20 / portTICK_RATE_MS)
 #define DRIVERS_UART_START_BYTE   0x05
 
-#define GPIO_OUTPUT_PIN_SEL ((1ULL<<DRIVER_0_ENABLE) | (1ULL<<SW_CTRL) | (1ULL<<VCC_IO_0) | (1ULL<<DIR_OUTPUT0) | (1ULL<<DIR_OUTPUT2) | (1ULL<<DIR_OUTPUT1) | (1ULL<<DIR_OUTPUT3))
+#define GPIO_OUTPUT_PIN_SEL ((1ULL<<DRIVER_0_ENABLE) | (1ULL<<SW_CTRL) | (1ULL<<VCC_IO) | (1ULL<<DIR_OUTPUT0) | (1ULL<<DIR_OUTPUT2) | (1ULL<<DIR_OUTPUT1) | (1ULL<<DIR_OUTPUT3))
 
 #define MOTOR_SPEED_COEFICIENT    71608    // 71608 = 1RPS
 

@@ -58,7 +58,7 @@ extern "C"{
         }
     }
 
-    static void ledc_init0()
+    static void ledc_init()
 {
     // Prepare and then apply the LEDC PWM timer configuration
     periph_module_enable(PERIPH_LEDC_MODULE);
@@ -66,90 +66,52 @@ extern "C"{
     ledc_timer.speed_mode       = LEDC_HIGH_SPEED_MODE;
     ledc_timer.timer_num        = LEDC_TIMER_0;
     ledc_timer.duty_resolution  = LEDC_TIMER_10_BIT;
-    ledc_timer.freq_hz          = 30000;  // set output frequency at 10000 Hz
+    ledc_timer.freq_hz          = 35000;  // set output frequency at 10000 Hz
     ledc_timer.clk_cfg = LEDC_USE_APB_CLK;
     ledc_timer_config(&ledc_timer);
 
     // Prepare and then apply the LEDC PWM channel configuration
-    ledc_channel_config_t ledc_channel;
-    ledc_channel.speed_mode = LEDC_HIGH_SPEED_MODE;
-    ledc_channel.channel    = LEDC_CHANNEL_0;
-    ledc_channel.timer_sel  = LEDC_TIMER_0;
-    ledc_channel.intr_type  = LEDC_INTR_FADE_END;
-    ledc_channel.gpio_num   = LEDC_OUTPUT_IO0;
-    ledc_channel.duty       = 512; // set duty at about 50%
-    ledc_channel.hpoint     = 0;
-    ledc_channel_config(&ledc_channel);
+    ledc_channel_config_t ledc_channel0;
+    ledc_channel0.speed_mode = LEDC_HIGH_SPEED_MODE;
+    ledc_channel0.channel    = LEDC_CHANNEL_0;
+    ledc_channel0.timer_sel  = LEDC_TIMER_0;
+    ledc_channel0.intr_type  = LEDC_INTR_FADE_END;
+    ledc_channel0.gpio_num   = LEDC_OUTPUT_IO0;
+    ledc_channel0.duty       = 512; // set duty at about 50%
+    ledc_channel0.hpoint     = 0;
+    ledc_channel_config(&ledc_channel0);
+
+    ledc_channel_config_t ledc_channel1;
+    ledc_channel1.speed_mode = LEDC_HIGH_SPEED_MODE;
+    ledc_channel1.channel    = LEDC_CHANNEL_1;
+    ledc_channel1.timer_sel  = LEDC_TIMER_0;
+    ledc_channel1.intr_type  = LEDC_INTR_FADE_END;
+    ledc_channel1.gpio_num   = LEDC_OUTPUT_IO1;
+    ledc_channel1.duty       = 512; // set duty at about 50%
+    ledc_channel1.hpoint     = 0;
+    ledc_channel_config(&ledc_channel1);
+
+    ledc_channel_config_t ledc_channel2;
+    ledc_channel2.speed_mode = LEDC_HIGH_SPEED_MODE;
+    ledc_channel2.channel    = LEDC_CHANNEL_2;
+    ledc_channel2.timer_sel  = LEDC_TIMER_0;
+    ledc_channel2.intr_type  = LEDC_INTR_FADE_END;
+    ledc_channel2.gpio_num   = LEDC_OUTPUT_IO2;
+    ledc_channel2.duty       = 512; // set duty at about 50%
+    ledc_channel2.hpoint     = 0;
+    ledc_channel_config(&ledc_channel2);
+
+    ledc_channel_config_t ledc_channel3;
+    ledc_channel3.speed_mode = LEDC_HIGH_SPEED_MODE;
+    ledc_channel3.channel    = LEDC_CHANNEL_3;
+    ledc_channel3.timer_sel  = LEDC_TIMER_0;
+    ledc_channel3.intr_type  = LEDC_INTR_FADE_END;
+    ledc_channel3.gpio_num   = LEDC_OUTPUT_IO3;
+    ledc_channel3.duty       = 512; // set duty at about 50%
+    ledc_channel3.hpoint     = 0;
+    ledc_channel_config(&ledc_channel3);
 }
-/*static void ledc_init1()
-{
-    // Prepare and then apply the LEDC PWM timer configuration
-    periph_module_enable(PERIPH_LEDC_MODULE);
-    ledc_timer_config_t ledc_timer;
-    ledc_timer.speed_mode       = LEDC_HIGH_SPEED_MODE;
-    ledc_timer.timer_num        = LEDC_TIMER_1;
-    ledc_timer.duty_resolution  = LEDC_TIMER_10_BIT;
-    ledc_timer.freq_hz          = 30000;  // set output frequency at 10000 Hz
-    ledc_timer.clk_cfg = LEDC_USE_APB_CLK;
-    ledc_timer_config(&ledc_timer);
 
-    // Prepare and then apply the LEDC PWM channel configuration
-    ledc_channel_config_t ledc_channel;
-    ledc_channel.speed_mode = LEDC_HIGH_SPEED_MODE;
-    ledc_channel.channel    = LEDC_CHANNEL_1;
-    ledc_channel.timer_sel  = LEDC_TIMER_1;
-    ledc_channel.intr_type  = LEDC_INTR_FADE_END;
-    ledc_channel.gpio_num   = LEDC_OUTPUT_IO1;
-    ledc_channel.duty       = 512; // set duty at about 50%
-    ledc_channel.hpoint     = 0;
-    ledc_channel_config(&ledc_channel);
-}
-static void ledc_init2()
-{
-    // Prepare and then apply the LEDC PWM timer configuration
-    periph_module_enable(PERIPH_LEDC_MODULE);
-    ledc_timer_config_t ledc_timer;
-    ledc_timer.speed_mode       = LEDC_HIGH_SPEED_MODE;
-    ledc_timer.timer_num        = LEDC_TIMER_2;
-    ledc_timer.duty_resolution  = LEDC_TIMER_10_BIT;
-    ledc_timer.freq_hz          = 30000;  // set output frequency at 10000 Hz
-    ledc_timer.clk_cfg = LEDC_USE_APB_CLK;
-    ledc_timer_config(&ledc_timer);
-
-    // Prepare and then apply the LEDC PWM channel configuration
-    ledc_channel_config_t ledc_channel;
-    ledc_channel.speed_mode = LEDC_HIGH_SPEED_MODE;
-    ledc_channel.channel    = LEDC_CHANNEL_2;
-    ledc_channel.timer_sel  = LEDC_TIMER_2;
-    ledc_channel.intr_type  = LEDC_INTR_FADE_END;
-    ledc_channel.gpio_num   = LEDC_OUTPUT_IO2;
-    ledc_channel.duty       = 512; // set duty at about 50%
-    ledc_channel.hpoint     = 0;
-    ledc_channel_config(&ledc_channel);
-}
-static void ledc_init3()
-{
-    // Prepare and then apply the LEDC PWM timer configuration
-    periph_module_enable(PERIPH_LEDC_MODULE);
-    ledc_timer_config_t ledc_timer;
-    ledc_timer.speed_mode       = LEDC_HIGH_SPEED_MODE;
-    ledc_timer.timer_num        = LEDC_TIMER_3;
-    ledc_timer.duty_resolution  = LEDC_TIMER_10_BIT;
-    ledc_timer.freq_hz          = 30000;  // set output frequency at 10000 Hz
-    ledc_timer.clk_cfg = LEDC_USE_APB_CLK;
-    ledc_timer_config(&ledc_timer);
-
-    // Prepare and then apply the LEDC PWM channel configuration
-    ledc_channel_config_t ledc_channel;
-    ledc_channel.speed_mode = LEDC_HIGH_SPEED_MODE;
-    ledc_channel.channel    = LEDC_CHANNEL_3;
-    ledc_channel.timer_sel  = LEDC_TIMER_3;
-    ledc_channel.intr_type  = LEDC_INTR_FADE_END;
-    ledc_channel.gpio_num   = LEDC_OUTPUT_IO3;
-    ledc_channel.duty       = 512; // set duty at about 50%
-    ledc_channel.hpoint     = 0;
-    ledc_channel_config(&ledc_channel);
-}*/
 static void pcnt_example_init(void)
 {
     /* Prepare configuration for the PCNT unit */
