@@ -71,14 +71,15 @@ extern "C"{
     ledc_timer_config(&ledc_timer);
 
     // Prepare and then apply the LEDC PWM channel configuration
-    ledc_channel_config_t ledc_channel0;
-    ledc_channel0.speed_mode = LEDC_HIGH_SPEED_MODE;
-    ledc_channel0.channel    = LEDC_CHANNEL_0;
-    ledc_channel0.timer_sel  = LEDC_TIMER_0;
-    ledc_channel0.intr_type  = LEDC_INTR_FADE_END;
-    ledc_channel0.gpio_num   = LEDC_OUTPUT_IO0;
-    ledc_channel0.duty       = 512; // set duty at about 50%
-    ledc_channel0.hpoint     = 0;
+    ledc_channel_config_t ledc_channel0 = {
+        .gpio_num   = LEDC_OUTPUT_IO0,
+        .speed_mode = LEDC_HIGH_SPEED_MODE,
+        .channel    = LEDC_CHANNEL_0,
+        .intr_type  = LEDC_INTR_FADE_END,
+        .timer_sel  = LEDC_TIMER_0,
+        .duty       = 512, // set duty at about 50%
+        .hpoint     = 0,
+    };    
     ledc_channel_config(&ledc_channel0);
 
     ledc_channel_config_t ledc_channel1 = {
@@ -88,28 +89,30 @@ extern "C"{
         .intr_type  = LEDC_INTR_FADE_END,
         .timer_sel  = LEDC_TIMER_0,
         .duty       = 512, // set duty at about 50
-        .hpoint     = 0
+        .hpoint     = 0,
     };
     ledc_channel_config(&ledc_channel1);
 
-    ledc_channel_config_t ledc_channel2;
-    ledc_channel2.speed_mode = LEDC_HIGH_SPEED_MODE;
-    ledc_channel2.channel    = LEDC_CHANNEL_2;
-    ledc_channel2.timer_sel  = LEDC_TIMER_0;
-    ledc_channel2.intr_type  = LEDC_INTR_FADE_END;
-    ledc_channel2.gpio_num   = LEDC_OUTPUT_IO2;
-    ledc_channel2.duty       = 512; // set duty at about 50%
-    ledc_channel2.hpoint     = 0;
+    ledc_channel_config_t ledc_channel2 = {
+        .gpio_num   = LEDC_OUTPUT_IO2,
+        .speed_mode = LEDC_HIGH_SPEED_MODE,
+        .channel    = LEDC_CHANNEL_2,
+        .intr_type  = LEDC_INTR_FADE_END,
+        .timer_sel  = LEDC_TIMER_0,
+        .duty       = 512, // set duty at about 50%
+        .hpoint     = 0,
+    };    
     ledc_channel_config(&ledc_channel2);
 
-    ledc_channel_config_t ledc_channel3;
-    ledc_channel3.speed_mode = LEDC_HIGH_SPEED_MODE;
-    ledc_channel3.channel    = LEDC_CHANNEL_3;
-    ledc_channel3.timer_sel  = LEDC_TIMER_0;
-    ledc_channel3.intr_type  = LEDC_INTR_FADE_END;
-    ledc_channel3.gpio_num   = LEDC_OUTPUT_IO3;
-    ledc_channel3.duty       = 512; // set duty at about 50%
-    ledc_channel3.hpoint     = 0;
+    ledc_channel_config_t ledc_channel3 = {
+        .gpio_num   = LEDC_OUTPUT_IO3,
+        .speed_mode = LEDC_HIGH_SPEED_MODE,
+        .channel    = LEDC_CHANNEL_3,
+        .intr_type  = LEDC_INTR_FADE_END,
+        .timer_sel  = LEDC_TIMER_0,
+        .duty       = 512, // set duty at about 50%
+        .hpoint     = 0,
+    };    
     ledc_channel_config(&ledc_channel3);
 }
 
