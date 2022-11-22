@@ -81,14 +81,15 @@ extern "C"{
     ledc_channel0.hpoint     = 0;
     ledc_channel_config(&ledc_channel0);
 
-    ledc_channel_config_t ledc_channel1;
-    ledc_channel1.speed_mode = LEDC_HIGH_SPEED_MODE;
-    ledc_channel1.channel    = LEDC_CHANNEL_1;
-    ledc_channel1.timer_sel  = LEDC_TIMER_0;
-    ledc_channel1.intr_type  = LEDC_INTR_FADE_END;
-    ledc_channel1.gpio_num   = LEDC_OUTPUT_IO1;
-    ledc_channel1.duty       = 512; // set duty at about 50%
-    ledc_channel1.hpoint     = 0;
+    ledc_channel_config_t ledc_channel1 = {
+        .gpio_num   = LEDC_OUTPUT_IO1,
+        .speed_mode = LEDC_HIGH_SPEED_MODE,
+        .channel    = LEDC_CHANNEL_1,
+        .intr_type  = LEDC_INTR_FADE_END,
+        .timer_sel  = LEDC_TIMER_0,
+        .duty       = 512, // set duty at about 50
+        .hpoint     = 0
+    };
     ledc_channel_config(&ledc_channel1);
 
     ledc_channel_config_t ledc_channel2;
