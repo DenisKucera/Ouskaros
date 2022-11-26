@@ -333,7 +333,7 @@ extern "C" void app_main(void)
         if(gpio_get_level(KONCOVY_DOJEZD_3)){
             ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
         }
-        vTaskDelay(100/portTICK_PERIOD_MS);
+        vTaskDelay(1000/portTICK_PERIOD_MS);
         //git update
     }
 }

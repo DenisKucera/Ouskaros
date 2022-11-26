@@ -46,8 +46,8 @@
 #define PCNT_INPUT_1        GPIO_NUM_13
 #define PCNT_INPUT_2        GPIO_NUM_15
 #define PCNT_INPUT_3        GPIO_NUM_18
-#define PCNT_H_LIM_VAL      1000
-#define PCNT_L_LIM_VAL     -1000
+#define PCNT_H_LIM_VAL      1
+#define PCNT_L_LIM_VAL     -1
 #define PCNT_THRESH1_VAL    1000
 #define PCNT_THRESH0_VAL   -1000
 volatile int pcnt0_count = 0;
