@@ -44,14 +44,14 @@ public:
 
     void disable() { enable(false); }
 
-    bool set_speed(int speed) {
-        return _write(0x22, speed);
-    }
     int read_gconf(uint32_t index_read){
         return _read(0x00, index_read);
     }
     bool set_gconf(int index){
         return _write(0x00, index);
+    }
+    bool set_speed(int speed) {
+        return _write(0x22, speed);
     }
     int read_speed(uint32_t& read) {
         return _read(0x22, read);
