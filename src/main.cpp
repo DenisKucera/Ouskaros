@@ -335,7 +335,7 @@ extern "C" void app_main(void)
         if(gpio_get_level(KONCOVY_DOJEZD_3)){
             ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
         }
-        printf("GCONF: \n %d",index_read);
+        printf("GCONF:  %d\n",index_read);
         vTaskDelay(1000/portTICK_PERIOD_MS);
         //git update
     }
