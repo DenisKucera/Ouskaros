@@ -100,7 +100,9 @@ static void initDriver(Driver& driver, const int iRun, const int iHold) {
     vTaskDelay(100 / portTICK_PERIOD_MS);   
     uint32_t data =0;
 
-    driver.read_gconf(index_read);
+   /* uint32_t index;
+    driver.read_gconf(index);
+    printf("GCONF:  %d\n",index);*/
 
     uint32_t position;
     driver.get_MSCNT(position);
@@ -289,14 +291,14 @@ extern "C" void app_main(void)
     xTaskCreatePinnedToCore(pulse,"pulse counter",10000,NULL,1,&pulse_count,1); 
     vTaskDelay(1/portTICK_PERIOD_MS);  
     while(1){
-     /* printf("KONCOVY_DOJEZD_0 %d\n", gpio_get_level(KONCOVY_DOJEZD_0));
+        printf("KONCOVY_DOJEZD_0 %d\n", gpio_get_level(KONCOVY_DOJEZD_0));
         vTaskDelay(5/portTICK_PERIOD_MS);
         printf("KONCOVY_DOJEZD_1 %d\n", gpio_get_level(KONCOVY_DOJEZD_1));
         vTaskDelay(5/portTICK_PERIOD_MS);
         printf("KONCOVY_DOJEZD_2 %d\n", gpio_get_level(KONCOVY_DOJEZD_2));
         vTaskDelay(5/portTICK_PERIOD_MS);
         printf("KONCOVY_DOJEZD_3 %d\n", gpio_get_level(KONCOVY_DOJEZD_3));
-        vTaskDelay(5/portTICK_PERIOD_MS);*/
+        vTaskDelay(5/portTICK_PERIOD_MS);
         driver0.set_speed(motor_speed0);
         vTaskDelay(5/portTICK_PERIOD_MS);
         driver1.set_speed(motor_speed1);
@@ -320,10 +322,10 @@ extern "C" void app_main(void)
       /* pcnt();
         printf("pocet pulzu: %d\n",pcnt0_count);
         vTaskDelay(1000/portTICK_PERIOD_MS);*/
-        printf("pocet pulzu: %d\n",pcnt0_count);
+        //printf("pocet pulzu: %d\n",pcnt0_count);
         vTaskDelay(5/portTICK_PERIOD_MS);
        // printf("procesor: %d\n", xPortGetCoreID());
-        if(gpio_get_level(KONCOVY_DOJEZD_1)){
+      /*  if(gpio_get_level(KONCOVY_DOJEZD_1)){
             ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
         }
         if(gpio_get_level(KONCOVY_DOJEZD_0)){
@@ -335,7 +337,8 @@ extern "C" void app_main(void)
         if(gpio_get_level(KONCOVY_DOJEZD_3)){
             ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
         }
-        printf("GCONF:  %d\n",index_read);
+        */
+       // printf("GCONF:  %d\n",);
         vTaskDelay(1000/portTICK_PERIOD_MS);
         //git update
     }

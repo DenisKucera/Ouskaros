@@ -81,7 +81,6 @@ uint32_t position0;
 uint32_t position1;
 uint32_t position2;
 uint32_t position3;
-uint32_t index_read;
 volatile int motor_load = 0;
 volatile int motor_stop_sensitivity = 100;
 volatile int potenciometr = 0;
