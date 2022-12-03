@@ -38,11 +38,11 @@
 #define LEDC_OUTPUT_IO1      GPIO_NUM_26  //inicializace STEP pinu
 #define DIR_OUTPUT1         GPIO_NUM_21  //inicializace DIR pinu
 #define LEDC_OUTPUT_IO2      GPIO_NUM_27  //inicializace STEP pinu
-#define DIR_OUTPUT2         GPIO_NUM_2  //inicializace DIR pinu
+#define DIR_OUTPUT2         GPIO_NUM_2  //inicializace DIR pinu  //MUST BE LOW OR UNCONNECTED!!!
 #define LEDC_OUTPUT_IO3      GPIO_NUM_14  //inicializace STEP pinu
 #define DIR_OUTPUT3         GPIO_NUM_19  //inicializace DIR pinu
 #define PCNT_TEST_UNIT      PCNT_UNIT_0
-#define PCNT_INPUT_0        GPIO_NUM_12
+#define PCNT_INPUT_0        GPIO_NUM_12 //BOOT FAILS IF PULLED HIGH!!!
 #define PCNT_INPUT_1        GPIO_NUM_13
 #define PCNT_INPUT_2        GPIO_NUM_15
 #define PCNT_INPUT_3        GPIO_NUM_18
@@ -61,9 +61,9 @@ volatile int pcnt0_count = 0;
 #define DRIVERS_RX_TIMEOUT        (20 / portTICK_RATE_MS)
 #define DRIVERS_UART_START_BYTE   0x05
 
-#define GPIO_OUTPUT_PIN_SEL ((1ULL<<DRIVER_0_ENABLE) | (1ULL<<SW_CTRL) | (1ULL<<VCC_IO) | (1ULL<<DIR_OUTPUT0) | (1ULL<<DIR_OUTPUT2) | (1ULL<<DIR_OUTPUT1) | (1ULL<<DIR_OUTPUT3))
+#define GPIO_OUTPUT_PIN_SEL ((1ULL<<DRIVER_0_ENABLE) | (1ULL<<SW_CTRL) | (1ULL<<VCC_IO) | (1ULL<<DIR_OUTPUT0) |/* (1ULL<<DIR_OUTPUT2) error */| (1ULL<<DIR_OUTPUT1) | (1ULL<<DIR_OUTPUT3))
 
-#define MOTOR_SPEED_COEFICIENT    71608    // 71608 = 1RPS
+#define MOTOR_SPEED_COEFICIENT    71608    // 71608 = 1RPS VACTUAL 0x22= 2*23 uSTEPS/t
 
 #define ENCODER_H_LIM_VAL         1000
 #define ENCODER_L_LIM_VAL        -1000
