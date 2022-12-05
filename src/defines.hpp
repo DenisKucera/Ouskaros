@@ -61,7 +61,7 @@ volatile int pcnt0_count = 0;
 #define DRIVERS_RX_TIMEOUT        (20 / portTICK_RATE_MS)
 #define DRIVERS_UART_START_BYTE   0x05
 
-#define GPIO_OUTPUT_PIN_SEL ((1ULL<<DRIVER_0_ENABLE) | (1ULL<<SW_CTRL) | (1ULL<<VCC_IO) | (1ULL<<DIR_OUTPUT0) |/* (1ULL<<DIR_OUTPUT2) error */| (1ULL<<DIR_OUTPUT1) | (1ULL<<DIR_OUTPUT3))
+#define GPIO_OUTPUT_PIN_SEL ((1ULL<<DRIVER_0_ENABLE) | (1ULL<<SW_CTRL) | (1ULL<<VCC_IO) | (1ULL<<DIR_OUTPUT0) | (1ULL<<DIR_OUTPUT2)  | (1ULL<<DIR_OUTPUT1) | (1ULL<<DIR_OUTPUT3))
 
 #define MOTOR_SPEED_COEFICIENT    71608    // 71608 = 1RPS VACTUAL 0x22= 2*23 uSTEPS/t
 
@@ -90,3 +90,4 @@ volatile bool start_stop = true;
 volatile bool x = false;
 volatile uint mot_load[2048];
 volatile uint mot_pos[2048];
+volatile int count=0;

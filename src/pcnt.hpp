@@ -65,9 +65,9 @@ extern "C"{
     ledc_timer_config_t ledc_timer;
     ledc_timer.speed_mode       = LEDC_HIGH_SPEED_MODE;
     ledc_timer.timer_num        = LEDC_TIMER_0;
-    ledc_timer.duty_resolution  = LEDC_TIMER_10_BIT;
-    ledc_timer.freq_hz          = 45000;  // set output frequency at 10000 Hz
-    ledc_timer.clk_cfg = LEDC_USE_APB_CLK;
+    ledc_timer.duty_resolution  = LEDC_TIMER_8_BIT;
+    ledc_timer.freq_hz          = 50000;  // set output frequency at 10000 Hz
+    ledc_timer.clk_cfg = LEDC_AUTO_CLK;
     ledc_timer_config(&ledc_timer);
 
     // Prepare and then apply the LEDC PWM channel configuration
@@ -77,7 +77,7 @@ extern "C"{
         .channel    = LEDC_CHANNEL_0,
         .intr_type  = LEDC_INTR_FADE_END,
         .timer_sel  = LEDC_TIMER_0,
-        .duty       = 512, // set duty at about 50%
+        .duty       = 128, // set duty at about 50%
         .hpoint     = 0,
     };    
     ledc_channel_config(&ledc_channel0);
@@ -88,7 +88,7 @@ extern "C"{
         .channel    = LEDC_CHANNEL_1,
         .intr_type  = LEDC_INTR_FADE_END,
         .timer_sel  = LEDC_TIMER_0,
-        .duty       = 512, // set duty at about 50
+        .duty       = 128, // set duty at about 50
         .hpoint     = 0,
     };
     ledc_channel_config(&ledc_channel1);
@@ -99,7 +99,7 @@ extern "C"{
         .channel    = LEDC_CHANNEL_2,
         .intr_type  = LEDC_INTR_FADE_END,
         .timer_sel  = LEDC_TIMER_0,
-        .duty       = 512, // set duty at about 50%
+        .duty       = 128, // set duty at about 50%
         .hpoint     = 0,
     };    
     ledc_channel_config(&ledc_channel2);
@@ -110,7 +110,7 @@ extern "C"{
         .channel    = LEDC_CHANNEL_3,
         .intr_type  = LEDC_INTR_FADE_END,
         .timer_sel  = LEDC_TIMER_0,
-        .duty       = 512, // set duty at about 50%
+        .duty       = 128, // set duty at about 50%
         .hpoint     = 0,
     };    
     ledc_channel_config(&ledc_channel3);

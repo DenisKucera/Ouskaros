@@ -30,7 +30,7 @@ public:
         int result = _read(0, data);
         printf("registr 0x00 pred zapisem  %d %X\n", result, data);
         vTaskDelay(100 / portTICK_PERIOD_MS);
-        _write(0, 0x000000E0);
+        _write(0, 0x000000F0);
         vTaskDelay(100 / portTICK_PERIOD_MS);
         result = _read(0, data);
         printf("registr 0x00 po zapisu %d %X\n", result, data);
