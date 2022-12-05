@@ -95,6 +95,7 @@ static void initGridUi() {
     builder.commit();
 }
 
+    
 static void initDriver(Driver& driver, const int iRun, const int iHold) {
     driver.init();
     vTaskDelay(100 / portTICK_PERIOD_MS);   
@@ -106,7 +107,11 @@ static void initDriver(Driver& driver, const int iRun, const int iHold) {
 
     uint32_t position;
     driver.get_MSCNT(position);
-    printf("POCATECNI POZICE MOTORU %d\n", position);
+    printf("POCATECNI POZICE MOTORU: %d\n", position);
+
+    uint32_t gconf;
+    driver.read_gconf(gconf);
+    printf("GCONF!!!!!!!!!!!!!!!!!!!: %d\n",gconf);
 
     int result = driver.get_PWMCONF(data);
     if (result != 0)
@@ -187,6 +192,7 @@ extern "C" void app_main(void)
     initDriver(driver0, 32, 32);
     driver0.get_MSCNT(position0);
     driver0.set_speed(motor_speed0);
+    driver0.read_gconf(gconf0);
     vTaskDelay(200/portTICK_PERIOD_MS);
     Driver driver1 { drivers_uart, DRIVER_1_ADDRES, DRIVER_1_ENABLE };
     initDriver(driver1, 32, 32); 
@@ -300,6 +306,8 @@ extern "C" void app_main(void)
         printf("KONCOVY_DOJEZD_3 %d\n", gpio_get_level(KONCOVY_DOJEZD_3));*/
         vTaskDelay(5/portTICK_PERIOD_MS);
         driver0.set_speed(motor_speed0);
+       // driver0.read_gconf(picus);
+        //printf("GCONF!!!!!!!!!!!!!!!!!!!: %d\n",picus);
         vTaskDelay(5/portTICK_PERIOD_MS);
         driver1.set_speed(motor_speed1);
         vTaskDelay(5/portTICK_PERIOD_MS);
@@ -309,11 +317,14 @@ extern "C" void app_main(void)
         vTaskDelay(5/portTICK_PERIOD_MS);
         driver0.get_MSCNT(position0);
         printf("POZICE MOTORU0 %d\n", position0);
+        printf("GCONF0!!!!!!!!!!!!!!!!!!!: %d\n",gconf0);
         vTaskDelay(5/portTICK_PERIOD_MS);
-        printf("pocet count: %d\n",count);
 
+      /*  uint32_t picus=0;
+        
+        vTaskDelay(5/portTICK_PERIOD_MS);*/
        /* driver1.get_MSCNT(position1);
-        printf("POZICE MOTORU1 %d\n", position1);
+        printf("POZICE MOTORU1 %d\n", posit)ion1);
         vTaskDelay(5/portTICK_PERIOD_MS);
         driver2.get_MSCNT(position2);
         printf("POZICE MOTORU2 %d\n", position2);

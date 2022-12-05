@@ -77,6 +77,7 @@ volatile int hodnota0;
 volatile int hodnota1; 
 volatile int hodnota2; 
 volatile int hodnota3;
+uint32_t gconf0;
 uint32_t position0;
 uint32_t position1;
 uint32_t position2;
