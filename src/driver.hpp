@@ -54,7 +54,7 @@ public:
         return _write(0x22, speed);
     }
     int read_speed(uint32_t& read) {
-        return _read(0x22, read);
+        return _read(0x12, read);
     }
 
 
@@ -65,19 +65,19 @@ public:
         return _write(0x10, data);
     }
     
-    int get_PWMCONF(uint32_t& read) {
+    uint32_t get_PWMCONF(uint32_t& read) {
         return _read(0x70, read);
     }
 
-    int get_DRV_STATUS(uint32_t& read) {
+    uint32_t get_DRV_STATUS(uint32_t& read) {
         return _read(0x6F, read);
     }
  
-    int get_SG(uint32_t& read) {
+    int get_SG(uint32_t& read) { //Stallguard result
         return _read(0x41, read);
     }
 
-    int get_MSCNT(uint32_t& read) {
+    uint32_t get_MSCNT(uint32_t& read) {
         return _read(0x6A, read);
     }
 
