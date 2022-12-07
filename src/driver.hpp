@@ -81,6 +81,10 @@ public:
         return _read(0x6A, read);  //Microstep counter
     }
 
+    uint32_t get_MSCURACT(uint32_t& read) {
+        return _read(0x6B, read);  //Actual microstep current
+    }
+
     driver_address_t address() const { return c_address; }
      
 private:

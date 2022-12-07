@@ -77,6 +77,7 @@ volatile int hodnota0;
 volatile int hodnota1; 
 volatile int hodnota2; 
 volatile int hodnota3;
+uint32_t mscurrent0;
 uint32_t drvstatus0;
 uint32_t pwmconf0;
 uint32_t gconf0;

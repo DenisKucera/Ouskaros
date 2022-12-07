@@ -125,6 +125,10 @@ static void initDriver(Driver& driver, const int iRun, const int iHold) {
     driver.read_speed(read_speed);
     printf("SPEED: %d\n",read_speed);
 
+    uint32_t mscurrent;
+    driver.get_MSCURACT(mscurrent);
+    printf("CURRENT: %d\n",mscurrent);
+
     int result = driver.get_PWMCONF(data);
     if (result != 0)
         printf("PWMCONF driveru %d : ERROR  %d\n", driver.address(), result);
@@ -210,6 +214,7 @@ extern "C" void app_main(void)
     driver0.get_DRV_STATUS(drvstatus0);
     driver0.get_PWMCONF(pwmconf0);
     driver0.get_SG(sgresult0);
+    driver0.get_MSCURACT(mscurrent0);
     vTaskDelay(100/portTICK_PERIOD_MS);
     Driver driver1 { drivers_uart, DRIVER_1_ADDRES, DRIVER_1_ENABLE };
     initDriver(driver1, 32, 32); 
@@ -320,6 +325,7 @@ extern "C" void app_main(void)
         printf("PWMCONF_DRIVERU_0: %u\n",pwmconf0);
         printf("DRVSTATUS_DRIVERU_0: %u\n",drvstatus0);
         printf("STALLGUARD_RESULT_DRIVERU_0: %d\n",sgresult0);
+        printf("MSCURRENT: %d\n",mscurrent0);
         
 
     while(1){
