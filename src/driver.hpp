@@ -28,12 +28,12 @@ public:
         disable();
         data_t data = 0;
         int result = _read(0, data);
-        printf("registr 0x00 pred zapisem  %d %X\n", result, data);
+       // printf("registr 0x00 pred zapisem  %d %X\n", result, data);
         vTaskDelay(100 / portTICK_PERIOD_MS);
         _write(0x00, 0x000000D0);
         vTaskDelay(100 / portTICK_PERIOD_MS);
         result = _read(0, data);
-        printf("registr 0x00 po zapisu %d %X\n", result, data);
+       // printf("registr 0x00 po zapisu %d %X\n", result, data);
         vTaskDelay(100 / portTICK_PERIOD_MS);
         return result == 0;
     }
@@ -65,11 +65,11 @@ public:
         return _write(0x10, data);
     }
     
-    uint32_t get_PWMCONF(uint32_t& read) { //StealthChop PWM chopper configuration
+    int get_PWMCONF(uint32_t& read) { //StealthChop PWM chopper configuration
         return _read(0x70, read);
     }
 
-    uint32_t get_DRV_STATUS(uint32_t& read) {
+    int get_DRV_STATUS(uint32_t& read) {
         return _read(0x6F, read);  //Driver status flags and current level read
     }
  
@@ -77,12 +77,18 @@ public:
         return _read(0x41, read);
     }
 
-    uint32_t get_MSCNT(uint32_t& read) {
+    int get_MSCNT(uint32_t& read) {
         return _read(0x6A, read);  //Microstep counter
     }
 
-    uint32_t get_MSCURACT(uint32_t& read) {
+    int get_MSCURACT(uint32_t& read) {
         return _read(0x6B, read);  //Actual microstep current
+    }
+    int get_CHOPCONF(uint32_t& read) {
+        return _read(0x6C, read);  //Chopper and driver configuration
+    }
+    int get_GSTAT(uint32_t& read) {
+        return _read(0x01, read);  //Global status flags
     }
 
     driver_address_t address() const { return c_address; }
