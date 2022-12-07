@@ -45,16 +45,16 @@ public:
     void disable() { enable(false); }
 
     int read_gconf(uint32_t& index_read){
-        return _read(0x00, index_read);
+        return _read(0x00, index_read);  //Global configuration flags 
     }
     bool set_gconf(int index){
         return _write(0x00, index);
     }
     bool set_speed(int speed) {
-        return _write(0x22, speed);
+        return _write(0x22, speed); //Moving the motor by UART control.
     }
     int read_speed(uint32_t& read) {
-        return _read(0x12, read);
+        return _read(0x12, read); //Actual measured time between two microsteps
     }
 
 
@@ -65,20 +65,20 @@ public:
         return _write(0x10, data);
     }
     
-    uint32_t get_PWMCONF(uint32_t& read) {
+    uint32_t get_PWMCONF(uint32_t& read) { //StealthChop PWM chopper configuration
         return _read(0x70, read);
     }
 
     uint32_t get_DRV_STATUS(uint32_t& read) {
-        return _read(0x6F, read);
+        return _read(0x6F, read);  //Driver status flags and current level read
     }
  
-    int get_SG(uint32_t& read) { //Stallguard result
+    int get_SG(uint32_t& read) { //Stallguard result 0-255
         return _read(0x41, read);
     }
 
     uint32_t get_MSCNT(uint32_t& read) {
-        return _read(0x6A, read);
+        return _read(0x6A, read);  //Microstep counter
     }
 
     driver_address_t address() const { return c_address; }

@@ -155,7 +155,9 @@ extern "C" void app_main(void)
    // gpio_set_level(VCC_IO_3, 1); // zapnuti napajeni do driveru3
     gpio_set_level(GPIO_NUM_32, 1);// zapnuti siloveho napajeni do driveru
     printf("Zapnuti driveru\n");
-    printf("Ouskaros jedem!!!!!! \n\tbuild %s %s\n", __DATE__, __TIME__);
+    printf("\n");
+    printf("Oskar95 start \n\tbuild %s %s\n", __DATE__, __TIME__);
+    printf("\n");
     check_reset();
     iopins_init();
     //optozávory inicializace
@@ -208,7 +210,6 @@ extern "C" void app_main(void)
     driver0.get_DRV_STATUS(drvstatus0);
     driver0.get_PWMCONF(pwmconf0);
     driver0.get_SG(sgresult0);
-    driver0.read_speed(read_speed0);
     vTaskDelay(100/portTICK_PERIOD_MS);
     Driver driver1 { drivers_uart, DRIVER_1_ADDRES, DRIVER_1_ENABLE };
     initDriver(driver1, 32, 32); 
@@ -340,8 +341,7 @@ extern "C" void app_main(void)
         driver3.set_speed(motor_speed3);
         vTaskDelay(5/portTICK_PERIOD_MS);
        // printf("POZICE_MOTORU_0 %u\n", position0);
-        printf("RYCHLOST MOTORU 0 %d\n",read_speed0);
-        vTaskDelay(1000/portTICK_PERIOD_MS);
+        vTaskDelay(100/portTICK_PERIOD_MS);
     }
        // printf("POZICE_MOTORU_0 %d\n", position0);
        // vTaskDelay(5/portTICK_PERIOD_MS);
