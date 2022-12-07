@@ -66,7 +66,7 @@ extern "C"{
     ledc_timer.speed_mode       = LEDC_HIGH_SPEED_MODE;
     ledc_timer.timer_num        = LEDC_TIMER_0;
     ledc_timer.duty_resolution  = LEDC_TIMER_8_BIT;
-    ledc_timer.freq_hz          = 50000;  // set output frequency at 10000 Hz
+    ledc_timer.freq_hz          = 256;  // set output frequency at 10000 Hz
     ledc_timer.clk_cfg = LEDC_AUTO_CLK;
     ledc_timer_config(&ledc_timer);
 
