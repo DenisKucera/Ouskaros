@@ -378,6 +378,7 @@ extern "C" void app_main(void)
         vTaskDelay(5/portTICK_PERIOD_MS);
         driver3.set_speed(motor_speed3);
         vTaskDelay(5/portTICK_PERIOD_MS);
+        printf("pocet pulzu: %d\n",pcnt0_count); //50=1 otáčka (200step motor)
        // printf("POZICE_MOTORU_0 %u\n", position0);
         vTaskDelay(1000/portTICK_PERIOD_MS);
     }
@@ -395,7 +396,7 @@ extern "C" void app_main(void)
         //pulse();
        /* printf("pocet pulzu: %d\n",pcnt0_count);
         vTaskDelay(1000/portTICK_PERIOD_MS);*/
-        //printf("pocet pulzu: %d\n",pcnt0_count);
+        //
       //  vTaskDelay(5/portTICK_PERIOD_MS);
        // printf("procesor: %d\n", xPortGetCoreID());
         /*if(gpio_get_level(KONCOVY_DOJEZD_1)){
