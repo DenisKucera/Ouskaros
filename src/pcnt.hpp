@@ -66,7 +66,7 @@ extern "C"{
     ledc_timer.speed_mode       = LEDC_HIGH_SPEED_MODE;
     ledc_timer.timer_num        = LEDC_TIMER_0;
     ledc_timer.duty_resolution  = LEDC_TIMER_8_BIT;
-    ledc_timer.freq_hz          = 5120;  // set output frequency at 10000 Hz
+    ledc_timer.freq_hz          = 10240;  // set output frequency at 10000 Hz
     ledc_timer.clk_cfg = LEDC_AUTO_CLK;
     ledc_timer_config(&ledc_timer);
 
@@ -116,57 +116,37 @@ extern "C"{
     ledc_channel_config(&ledc_channel3);
 }
 
-static void pcnt_example_init(void)
-{
+ void index_pcnt(const pcnt_unit_t unit, const gpio_num_t pcnt_input, const gpio_num_t pcnt_ctrl){
     /* Prepare configuration for the PCNT unit */
-        pcnt_config_t pcnt_config;
-        // Set PCNT input signal and control GPIOs
-        pcnt_config.pulse_gpio_num = PCNT_INPUT_0;
-       // pcnt_config.pulse_gpio_num = PCNT_INPUT_1;
-       // pcnt_config.pulse_gpio_num = PCNT_INPUT_2;
-       // pcnt_config.pulse_gpio_num = PCNT_INPUT_3;
-        //.ctrl_gpio_num = PCNT_INPUT_CTRL_IO,
-        pcnt_config.channel = PCNT_CHANNEL_0;
-        //pcnt_config.channel = PCNT_CHANNEL_1;
-        pcnt_config.unit = PCNT_TEST_UNIT;
-        // What to do on the positive / negative edge of pulse input?
-        pcnt_config.pos_mode = PCNT_COUNT_INC;   // Count up on the positive edge
-        pcnt_config.neg_mode = PCNT_COUNT_DIS;   // Keep the counter value on the negative edge
-        // What to do when control input is low or high?
-        pcnt_config.lctrl_mode = PCNT_MODE_DISABLE; // Reverse counting direction if low
-        pcnt_config.hctrl_mode = PCNT_MODE_KEEP;    // Keep the primary counter mode if high
-        // Set the maximum and minimum limit values to watch
-        pcnt_config.counter_h_lim = PCNT_H_LIM_VAL;
-        pcnt_config.counter_l_lim = PCNT_L_LIM_VAL;
-    
+        pcnt_config_t pcnt_config = {
+        .pulse_gpio_num = pcnt_input,
+        .ctrl_gpio_num = pcnt_ctrl,
+        .lctrl_mode = PCNT_MODE_DISABLE, // Reverse counting direction if low
+        .hctrl_mode = PCNT_MODE_KEEP,    // Keep the primary counter mode if high
+        .pos_mode = PCNT_COUNT_INC,   // Count up on the positive edge
+        .neg_mode = PCNT_COUNT_DIS,   // Keep the counter value on the negative edge
+        .counter_h_lim = PCNT_H_LIM_VAL,
+        .counter_l_lim = PCNT_L_LIM_VAL,
+        .unit = PCNT_TEST_UNIT,
+        .channel = PCNT_CHANNEL_0,
+        };
     /* Initialize PCNT unit */
     pcnt_unit_config(&pcnt_config);
-    
-    /* Configure and enable the input filter */
-    //pcnt_set_filter_value(PCNT_TEST_UNIT, 100);
-    //pcnt_filter_enable(PCNT_TEST_UNIT);
-
     /* Set threshold 0 and 1 values and enable events to watch */
-    pcnt_set_event_value(PCNT_TEST_UNIT, PCNT_EVT_THRES_1, PCNT_THRESH1_VAL);
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_THRES_1);
-    pcnt_set_event_value(PCNT_TEST_UNIT, PCNT_EVT_THRES_0, PCNT_THRESH0_VAL);
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_THRES_0);
-    /* Enable events on zero, maximum and minimum limit values */
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_ZERO);
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_H_LIM);
-    pcnt_event_enable(PCNT_TEST_UNIT, PCNT_EVT_L_LIM);
-
+  //  pcnt_set_event_value(PCNT_TEST_UNIT, PCNT_EVT_TH//RES_1, PCNT_THRES//H1_VAL);
+    pcnt_event_enable(unit, PCNT_EVT_H_LIM);
+ 
     /* Initialize PCNT's counter */
-    pcnt_counter_pause(PCNT_TEST_UNIT);
-    pcnt_counter_clear(PCNT_TEST_UNIT);
+    pcnt_counter_pause(unit);
+    pcnt_counter_clear(unit);
 
     /* Register ISR handler and enable interrupts for PCNT unit */
     pcnt_isr_register(pcnt_example_intr_handler, NULL, 0, &user_isr_handle);
-    pcnt_intr_enable(PCNT_TEST_UNIT);
+    pcnt_intr_enable(unit);
 
     /* Everything is set up, now go to counting */
-    pcnt_counter_resume(PCNT_TEST_UNIT);
-}
+    pcnt_counter_resume(unit);
+ }
 
 void pulse(void*pvParameters)
 {
@@ -175,7 +155,7 @@ void pulse(void*pvParameters)
    // ledc_init();
     /* Initialize PCNT event queue and PCNT functions */
     pcnt_evt_queue = xQueueCreate(10, sizeof(pcnt_evt_t));
-    pcnt_example_init();
+    //pcnt_example_init();
 
     int16_t count = 0;
     pcnt_evt_t evt;
@@ -186,23 +166,26 @@ void pulse(void*pvParameters)
          */
         res = xQueueReceive(pcnt_evt_queue, &evt, 1000 / portTICK_PERIOD_MS);
         if (res == pdTRUE) {
-            pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
+           // pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
            // printf("Event PCNT unit[%d]; cnt: %d\n", evt.unit, count);
-            if (evt.status & PCNT_STATUS_THRES1_M) {
-                printf("THRES1 EVT\n");
-            }
-            if (evt.status & PCNT_STATUS_THRES0_M) {
-                printf("THRES0 EVT\n");
-            }
-            if (evt.status & PCNT_STATUS_L_LIM_M) {
-                printf("L_LIM EVT\n");
-            }
             if (evt.status & PCNT_STATUS_H_LIM_M) {
-             //   printf("H_LIM EVT\n");
-                pcnt0_count++;
-            }
-            if (evt.status & PCNT_STATUS_ZERO_M) {
-             //   printf("ZERO EVT\n");
+                printf("H_LIM EVT\n");
+                switch(evt.unit) {
+                    case 0:
+                        pcnt0_count++;
+                        break;
+                    case 1:
+                        pcnt1_count++;
+                        break;
+                    case 2:
+                        pcnt2_count++;
+                        break;
+                    case 3:
+                        pcnt3_count++;
+                        break;
+                    default:
+                        break;
+                }
             }
         } else {
             pcnt_get_counter_value(PCNT_TEST_UNIT, &count);

@@ -46,17 +46,18 @@
 #define PCNT_INPUT_1        GPIO_NUM_13
 #define PCNT_INPUT_2        GPIO_NUM_15
 #define PCNT_INPUT_3        GPIO_NUM_18
-#define PCNT_H_LIM_VAL      1
-#define PCNT_L_LIM_VAL     -1
-#define PCNT_THRESH1_VAL    1000
-#define PCNT_THRESH0_VAL   -1000
+#define PCNT_H_LIM_VAL      25
+#define PCNT_L_LIM_VAL     -25
 volatile int pcnt0_count = 0;
+volatile int pcnt1_count = 0;
+volatile int pcnt2_count = 0;
+volatile int pcnt3_count = 0;
 
 #define GPIO_BIT_MASK_INPUTS ((1ULL<<KONCOVY_DOJEZD_0) | (1ULL<<KONCOVY_DOJEZD_1) | (1ULL<<KONCOVY_DOJEZD_2) | (1ULL<<KONCOVY_DOJEZD_3))
 
 #define DRIVERS_UART              UART_NUM_1
-#define DRIVERS_UART_TXD          GPIO_NUM_17  // doma 27
-#define DRIVERS_UART_RXD          GPIO_NUM_16  // doma 26
+#define DRIVERS_UART_TXD          GPIO_NUM_17 
+#define DRIVERS_UART_RXD          GPIO_NUM_16 
 #define DRIVERS_UART_BUF_SIZE     256
 #define DRIVERS_RX_TIMEOUT        (20 / portTICK_RATE_MS)
 #define DRIVERS_UART_START_BYTE   0x05

@@ -359,7 +359,10 @@ extern "C" void app_main(void)
         printf("STALLGUARD_RESULT_DRIVERU_0: %d\n",sgresult0);
         printf("MSCURRENT: %d\n",mscurrent0);
         */
-
+       index_pcnt(PCNT_UNIT_0, PCNT_INPUT_0, DIR_OUTPUT0);
+       index_pcnt(PCNT_UNIT_1, PCNT_INPUT_1, DIR_OUTPUT1);
+       index_pcnt(PCNT_UNIT_2, PCNT_INPUT_2, DIR_OUTPUT2);
+       index_pcnt(PCNT_UNIT_3, PCNT_INPUT_3, DIR_OUTPUT3);
     while(1){
       /* printf("KONCOVY_DOJEZD_0 %d\n", gpio_get_level(KONCOVY_DOJEZD_0));
         vTaskDelay(5/portTICK_PERIOD_MS);
@@ -379,6 +382,12 @@ extern "C" void app_main(void)
         driver3.set_speed(motor_speed3);
         vTaskDelay(5/portTICK_PERIOD_MS);
         printf("pocet pulzu: %d\n",pcnt0_count); //50=1 otáčka (200step motor)
+      /* if(pcnt0_count){
+        ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
+        ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
+        ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_2, 0);
+        ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_3, 0);
+       }*/
        // printf("POZICE_MOTORU_0 %u\n", position0);
         vTaskDelay(1000/portTICK_PERIOD_MS);
     }
