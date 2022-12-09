@@ -232,7 +232,7 @@ extern "C" void app_main(void)
     driver3.set_speed(motor_speed3);
     printf("\n");
     
-   /* step_pulse_init(51200,LEDC_TIMER_0,LEDC_OUTPUT_IO0,LEDC_CHANNEL_0);
+    step_pulse_init(51200,LEDC_TIMER_0,LEDC_OUTPUT_IO0,LEDC_CHANNEL_0);
     step_pulse_init(1024,LEDC_TIMER_1,LEDC_OUTPUT_IO1,LEDC_CHANNEL_1);
     step_pulse_init(10240,LEDC_TIMER_2,LEDC_OUTPUT_IO2,LEDC_CHANNEL_2);
     step_pulse_init(4096,LEDC_TIMER_3,LEDC_OUTPUT_IO3,LEDC_CHANNEL_3);//zapnuti STEP pulzů*/
@@ -318,14 +318,14 @@ extern "C" void app_main(void)
 			otevrena_celist = 0;
 		}
         vTaskDelay(5/portTICK_PERIOD_MS);  */
-    TaskHandle_t  pulse_count;
+ /*   TaskHandle_t  pulse_count;
     xTaskCreatePinnedToCore(pulse,"pulse counter",10000,NULL,1,&pulse_count,1); 
-    vTaskDelay(1/portTICK_PERIOD_MS);
+    vTaskDelay(1/portTICK_PERIOD_MS);*/
     
-     /*  index_pcnt(PCNT_UNIT_0, PCNT_INPUT_0, DIR_OUTPUT0);
+       index_pcnt(PCNT_UNIT_0, PCNT_INPUT_0, DIR_OUTPUT0);
        index_pcnt(PCNT_UNIT_1, PCNT_INPUT_1, DIR_OUTPUT1);
        index_pcnt(PCNT_UNIT_2, PCNT_INPUT_2, DIR_OUTPUT2);
-       index_pcnt(PCNT_UNIT_3, PCNT_INPUT_3, DIR_OUTPUT3);*/
+       index_pcnt(PCNT_UNIT_3, PCNT_INPUT_3, DIR_OUTPUT3);
     while(1){
         /*if(SILOVKA){
             esp_restart();
@@ -338,15 +338,58 @@ extern "C" void app_main(void)
         printf("KONCOVY_DOJEZD_2 %d\n", gpio_get_level(KONCOVY_DOJEZD_2));
         vTaskDelay(5/portTICK_PERIOD_MS);
         printf("KONCOVY_DOJEZD_3 %d\n", gpio_get_level(KONCOVY_DOJEZD_1));*/
+
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        driver0.set_speed(71608);
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        driver1.set_speed(71608);
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        driver2.set_speed(71608);
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        driver3.set_speed(71608);
+
+        pcnt_evt_queue = xQueueCreate(10, sizeof(pcnt_evt_t));
+        //pcnt_example_init();
+
+        int16_t count = 0;
+        pcnt_evt_t evt;
+        portBASE_TYPE res;
+
+        res = xQueueReceive(pcnt_evt_queue, &evt, 100 / portTICK_PERIOD_MS);
+        if (res == pdTRUE) {
+           // pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
+           // printf("Event PCNT unit[%d]; cnt: %d\n", evt.unit, count);
+            if (evt.status & PCNT_STATUS_H_LIM_M) {
+                printf("H_LIM EVT\n");
+                switch(evt.unit) {
+                    case 0:
+                        pcnt0_count++;
+                        break;
+                    case 1:
+                        pcnt1_count++;
+                        break;
+                    case 2:
+                        pcnt2_count++;
+                        break;
+                    case 3:
+                        pcnt3_count++;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        } else {
+            pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
+         //   printf("Current counter value :%d\n", count);
+        }
+     //   printf("procesor: %d\n", xPortGetCoreID());
+    
+    if(user_isr_handle) {
+        //Free the ISR service handle.
+        esp_intr_free(user_isr_handle);
+        user_isr_handle = NULL;
+    }    
         
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        driver0.set_speed(608);
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        driver1.set_speed(608);
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        driver2.set_speed(608);
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        driver3.set_speed(608);
         vTaskDelay(5/portTICK_PERIOD_MS);
          if(gpio_get_level(KONCOVY_DOJEZD_0)){
             ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
@@ -393,8 +436,7 @@ extern "C" void app_main(void)
       //  vTaskDelay(5/portTICK_PERIOD_MS);
        // printf("procesor: %d\n", xPortGetCoreID());
        
-        
-}
+}      
 
 
     

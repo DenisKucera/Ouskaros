@@ -128,55 +128,16 @@ void step_pulse_init(const uint32_t freq_hz, const ledc_timer_t timer_num, const
     pcnt_counter_resume(unit);
  }
 
-void pulse(void*pvParameters)
-{
-    vTaskDelay(1/portTICK_PERIOD_MS);
+/*void pulse(void*pvParameters)*/
+
+   // vTaskDelay(1/portTICK_PERIOD_MS);
     /* Initialize LEDC to generate sample pulse signal */
    // ledc_init();
     /* Initialize PCNT event queue and PCNT functions */
-    pcnt_evt_queue = xQueueCreate(10, sizeof(pcnt_evt_t));
-    //pcnt_example_init();
 
-    int16_t count = 0;
-    pcnt_evt_t evt;
-    portBASE_TYPE res;
-    while (1) {
-        /* Wait for the event information passed from PCNT's interrupt handler.
-         * Once received, decode the event type and print it on the serial monitor.
+ /*   while (1) {
+         Wait for the event information passed from PCNT's interrupt handler.
+          Once received, decode the event type and print it on the serial monitor.
          */
-        res = xQueueReceive(pcnt_evt_queue, &evt, 1000 / portTICK_PERIOD_MS);
-        if (res == pdTRUE) {
-           // pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
-           // printf("Event PCNT unit[%d]; cnt: %d\n", evt.unit, count);
-            if (evt.status & PCNT_STATUS_H_LIM_M) {
-                printf("H_LIM EVT\n");
-                switch(evt.unit) {
-                    case 0:
-                        pcnt0_count++;
-                        break;
-                    case 1:
-                        pcnt1_count++;
-                        break;
-                    case 2:
-                        pcnt2_count++;
-                        break;
-                    case 3:
-                        pcnt3_count++;
-                        break;
-                    default:
-                        break;
-                }
-            }
-        } else {
-            pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
-         //   printf("Current counter value :%d\n", count);
-        }
-     //   printf("procesor: %d\n", xPortGetCoreID());
-    }
-    if(user_isr_handle) {
-        //Free the ISR service handle.
-        esp_intr_free(user_isr_handle);
-        user_isr_handle = NULL;
-    }    
-}
+   
 }
