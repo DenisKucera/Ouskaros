@@ -1,25 +1,5 @@
 #pragma once
 
-#include <stdio.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/portmacro.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "driver/periph_ctrl.h"
-#include "driver/ledc.h"
-#include "driver/gpio.h"
-#include "driver/pcnt.h"
-#include "esp_attr.h"
-#include "esp_log.h"
-#include "soc/gpio_sig_map.h"
-#include "soc/pcnt_reg.h"
-#include "soc/pcnt_struct.h"
-#include "driver/periph_ctrl.h"
-#include "defines.hpp"
-
-
-
-extern "C"{
 
     xQueueHandle pcnt_evt_queue;   // A queue to handle pulse counter events
     pcnt_isr_handle_t user_isr_handle = NULL; //user's ISR service handle
@@ -140,4 +120,3 @@ void step_pulse_init(const uint32_t freq_hz, const ledc_timer_t timer_num, const
           Once received, decode the event type and print it on the serial monitor.
          */
    
-}

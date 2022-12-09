@@ -321,6 +321,21 @@ extern "C" void app_main(void)
  /*   TaskHandle_t  pulse_count;
     xTaskCreatePinnedToCore(pulse,"pulse counter",10000,NULL,1,&pulse_count,1); 
     vTaskDelay(1/portTICK_PERIOD_MS);*/
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        driver0.set_speed(71608);
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        driver1.set_speed(71608);
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        driver2.set_speed(71608);
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        driver3.set_speed(71608);
+
+        pcnt_evt_queue = xQueueCreate(10, sizeof(pcnt_evt_t));
+        //pcnt_example_init();
+
+        int16_t count = 0;
+        pcnt_evt_t evt;
+        portBASE_TYPE res;
     
        index_pcnt(PCNT_UNIT_0, PCNT_INPUT_0, DIR_OUTPUT0);
        index_pcnt(PCNT_UNIT_1, PCNT_INPUT_1, DIR_OUTPUT1);
@@ -339,23 +354,8 @@ extern "C" void app_main(void)
         vTaskDelay(5/portTICK_PERIOD_MS);
         printf("KONCOVY_DOJEZD_3 %d\n", gpio_get_level(KONCOVY_DOJEZD_1));*/
 
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        driver0.set_speed(71608);
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        driver1.set_speed(71608);
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        driver2.set_speed(71608);
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        driver3.set_speed(71608);
 
-        pcnt_evt_queue = xQueueCreate(10, sizeof(pcnt_evt_t));
-        //pcnt_example_init();
-
-        int16_t count = 0;
-        pcnt_evt_t evt;
-        portBASE_TYPE res;
-
-        res = xQueueReceive(pcnt_evt_queue, &evt, 100 / portTICK_PERIOD_MS);
+        res = xQueueReceive(pcnt_evt_queue, &evt, 0 / portTICK_PERIOD_MS);
         if (res == pdTRUE) {
            // pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
            // printf("Event PCNT unit[%d]; cnt: %d\n", evt.unit, count);
@@ -381,14 +381,8 @@ extern "C" void app_main(void)
         } else {
             pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
          //   printf("Current counter value :%d\n", count);
-        }
-     //   printf("procesor: %d\n", xPortGetCoreID());
-    
-    if(user_isr_handle) {
-        //Free the ISR service handle.
-        esp_intr_free(user_isr_handle);
-        user_isr_handle = NULL;
-    }    
+        
+     //   printf("procesor: %d\n", xPortGetCoreID()); 
         
         vTaskDelay(5/portTICK_PERIOD_MS);
          if(gpio_get_level(KONCOVY_DOJEZD_0)){
@@ -435,7 +429,7 @@ extern "C" void app_main(void)
         //
       //  vTaskDelay(5/portTICK_PERIOD_MS);
        // printf("procesor: %d\n", xPortGetCoreID());
-       
+    }   
 }      
 
 
