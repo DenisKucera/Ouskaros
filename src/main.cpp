@@ -379,7 +379,7 @@ extern "C" void app_main(void)
                 }
             }
         } else {
-            pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
+           // pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
          //   printf("Current counter value :%d\n", count);
         
      //   printf("procesor: %d\n", xPortGetCoreID()); 
@@ -410,7 +410,7 @@ extern "C" void app_main(void)
        // printf("POZICE_MOTORU_0 %u\n", position0);,
       /*  printf("SWITCH_0: %d\n",gpio_get_level(SWITCH_0));
         printf("SWITCH_1: %d\n",gpio_get_level(SWITCH_1));*/
-        vTaskDelay(1000/portTICK_PERIOD_MS);
+       // vTaskDelay(1000/portTICK_PERIOD_MS);
     }
        // printf("POZICE_MOTORU_0 %d\n", position0);
        // vTaskDelay(5/portTICK_PERIOD_MS);
