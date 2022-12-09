@@ -5,10 +5,7 @@
 #define DRIVER_2_ADDRES           2
 #define DRIVER_3_ADDRES           3
 
-#define DRIVER_0_ENABLE           GPIO_NUM_23   // H= disable motor output
-#define DRIVER_1_ENABLE           GPIO_NUM_23
-#define DRIVER_2_ENABLE           GPIO_NUM_23
-#define DRIVER_3_ENABLE           GPIO_NUM_23
+#define DRIVER_ENABLE           GPIO_NUM_23   // H= disable motor output
 
 #define VCC_IO                  GPIO_NUM_33  // L = reset driver 0, H = driver0 on
 //#define VCC_IO_1                  GPIO_NUM_33  // L = reset driver 0, H = driver0 on
@@ -21,6 +18,11 @@
 #define KONCOVY_DOJEZD_1          GPIO_NUM_34
 #define KONCOVY_DOJEZD_2          GPIO_NUM_39
 #define KONCOVY_DOJEZD_3          GPIO_NUM_36
+
+#define SWITCH_0        GPIO_NUM_25
+#define SWITCH_1        GPIO_NUM_22
+
+//#define SILOVKA         GPIO......
 
 /*#define PCNT_TEST_UNIT      PCNT_UNIT_0
 #define PCNT_H_LIM_VAL      10
@@ -53,7 +55,7 @@ volatile int pcnt1_count = 0;
 volatile int pcnt2_count = 0;
 volatile int pcnt3_count = 0;
 
-#define GPIO_BIT_MASK_INPUTS ((1ULL<<KONCOVY_DOJEZD_0) | (1ULL<<KONCOVY_DOJEZD_1) | (1ULL<<KONCOVY_DOJEZD_2) | (1ULL<<KONCOVY_DOJEZD_3))
+#define GPIO_BIT_MASK_INPUTS ((1ULL<<KONCOVY_DOJEZD_0) | (1ULL<<KONCOVY_DOJEZD_1) | (1ULL<<KONCOVY_DOJEZD_2) | (1ULL<<KONCOVY_DOJEZD_3) | (1ULL<<SWITCH_0) | (1ULL<<SWITCH_1))
 
 #define DRIVERS_UART              UART_NUM_1
 #define DRIVERS_UART_TXD          GPIO_NUM_17 
@@ -62,7 +64,7 @@ volatile int pcnt3_count = 0;
 #define DRIVERS_RX_TIMEOUT        (20 / portTICK_RATE_MS)
 #define DRIVERS_UART_START_BYTE   0x05
 
-#define GPIO_OUTPUT_PIN_SEL ((1ULL<<DRIVER_0_ENABLE) | (1ULL<<SW_CTRL) | (1ULL<<VCC_IO) | (1ULL<<DIR_OUTPUT0) | (1ULL<<DIR_OUTPUT2)  | (1ULL<<DIR_OUTPUT1) | (1ULL<<DIR_OUTPUT3))
+#define GPIO_OUTPUT_PIN_SEL ((1ULL<<DRIVER_ENABLE) | (1ULL<<SW_CTRL) | (1ULL<<VCC_IO) | (1ULL<<DIR_OUTPUT0) | (1ULL<<DIR_OUTPUT2)  | (1ULL<<DIR_OUTPUT1) | (1ULL<<DIR_OUTPUT3))
 
 #define MOTOR_SPEED_COEFICIENT    71608    // 71608 = 1RPS VACTUAL 0x22= 2*23 uSTEPS/t
 

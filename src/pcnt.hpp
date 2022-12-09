@@ -58,30 +58,31 @@ extern "C"{
         }
     }
 
-    static void ledc_init()
+void step_pulse_init(const uint32_t freq_hz, const ledc_timer_t timer_num, const gpio_num_t ledc_output, const ledc_channel_t channel)
 {
     // Prepare and then apply the LEDC PWM timer configuration
     periph_module_enable(PERIPH_LEDC_MODULE);
-    ledc_timer_config_t ledc_timer;
-    ledc_timer.speed_mode       = LEDC_HIGH_SPEED_MODE;
-    ledc_timer.timer_num        = LEDC_TIMER_0;
-    ledc_timer.duty_resolution  = LEDC_TIMER_8_BIT;
-    ledc_timer.freq_hz          = 10240;  // set output frequency at 10000 Hz
-    ledc_timer.clk_cfg = LEDC_AUTO_CLK;
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode       = LEDC_HIGH_SPEED_MODE,
+        .duty_resolution  = LEDC_TIMER_8_BIT,
+        .timer_num        = timer_num,
+        .freq_hz          = freq_hz,  // set output frequency at 10000 Hz
+        .clk_cfg = LEDC_AUTO_CLK,
+    };
     ledc_timer_config(&ledc_timer);
 
     // Prepare and then apply the LEDC PWM channel configuration
-    ledc_channel_config_t ledc_channel0 = {
-        .gpio_num   = LEDC_OUTPUT_IO0,
+    ledc_channel_config_t ledc_channel = {
+        .gpio_num   = ledc_output,
         .speed_mode = LEDC_HIGH_SPEED_MODE,
-        .channel    = LEDC_CHANNEL_0,
+        .channel    = channel,
         .intr_type  = LEDC_INTR_FADE_END,
-        .timer_sel  = LEDC_TIMER_0,
+        .timer_sel  = timer_num,
         .duty       = 128, // set duty at about 50%
         .hpoint     = 0,
     };    
-    ledc_channel_config(&ledc_channel0);
-
+    ledc_channel_config(&ledc_channel);
+/*
     ledc_channel_config_t ledc_channel1 = {
         .gpio_num   = LEDC_OUTPUT_IO1,
         .speed_mode = LEDC_HIGH_SPEED_MODE,
@@ -92,28 +93,7 @@ extern "C"{
         .hpoint     = 0,
     };
     ledc_channel_config(&ledc_channel1);
-
-    ledc_channel_config_t ledc_channel2 = {
-        .gpio_num   = LEDC_OUTPUT_IO2,
-        .speed_mode = LEDC_HIGH_SPEED_MODE,
-        .channel    = LEDC_CHANNEL_2,
-        .intr_type  = LEDC_INTR_FADE_END,
-        .timer_sel  = LEDC_TIMER_0,
-        .duty       = 128, // set duty at about 50%
-        .hpoint     = 0,
-    };    
-    ledc_channel_config(&ledc_channel2);
-
-    ledc_channel_config_t ledc_channel3 = {
-        .gpio_num   = LEDC_OUTPUT_IO3,
-        .speed_mode = LEDC_HIGH_SPEED_MODE,
-        .channel    = LEDC_CHANNEL_3,
-        .intr_type  = LEDC_INTR_FADE_END,
-        .timer_sel  = LEDC_TIMER_0,
-        .duty       = 128, // set duty at about 50%
-        .hpoint     = 0,
-    };    
-    ledc_channel_config(&ledc_channel3);
+*/
 }
 
  void index_pcnt(const pcnt_unit_t unit, const gpio_num_t pcnt_input, const gpio_num_t pcnt_ctrl){
