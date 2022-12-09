@@ -82,18 +82,6 @@ void step_pulse_init(const uint32_t freq_hz, const ledc_timer_t timer_num, const
         .hpoint     = 0,
     };    
     ledc_channel_config(&ledc_channel);
-/*
-    ledc_channel_config_t ledc_channel1 = {
-        .gpio_num   = LEDC_OUTPUT_IO1,
-        .speed_mode = LEDC_HIGH_SPEED_MODE,
-        .channel    = LEDC_CHANNEL_1,
-        .intr_type  = LEDC_INTR_FADE_END,
-        .timer_sel  = LEDC_TIMER_0,
-        .duty       = 128, // set duty at about 50
-        .hpoint     = 0,
-    };
-    ledc_channel_config(&ledc_channel1);
-*/
 }
 
  void index_pcnt(const pcnt_unit_t unit, const gpio_num_t pcnt_input, const gpio_num_t pcnt_ctrl){
@@ -107,11 +95,11 @@ void step_pulse_init(const uint32_t freq_hz, const ledc_timer_t timer_num, const
         .neg_mode = PCNT_COUNT_DIS,   // Keep the counter value on the negative edge
         .counter_h_lim = PCNT_H_LIM_VAL,
         .counter_l_lim = PCNT_L_LIM_VAL,
-        .unit = PCNT_TEST_UNIT,
+        .unit = unit,
         .channel = PCNT_CHANNEL_0,
         };
-    /* Initialize PCNT unit */
     pcnt_unit_config(&pcnt_config);
+    /* Initialize PCNT unit */
     /* Set threshold 0 and 1 values and enable events to watch */
   //  pcnt_set_event_value(PCNT_TEST_UNIT, PCNT_EVT_TH//RES_1, PCNT_THRES//H1_VAL);
     pcnt_event_enable(unit, PCNT_EVT_H_LIM);
@@ -126,30 +114,34 @@ void step_pulse_init(const uint32_t freq_hz, const ledc_timer_t timer_num, const
 
     /* Everything is set up, now go to counting */
     pcnt_counter_resume(unit);
- }
+    }
+
 
 void pulse(void*pvParameters)
 {
-    vTaskDelay(1/portTICK_PERIOD_MS);
+    //vTaskDelay(1/portTICK_PERIOD_MS);
     /* Initialize LEDC to generate sample pulse signal */
    // ledc_init();
     /* Initialize PCNT event queue and PCNT functions */
     pcnt_evt_queue = xQueueCreate(10, sizeof(pcnt_evt_t));
     //pcnt_example_init();
-
-    int16_t count = 0;
+    index_pcnt(PCNT_UNIT_0, PCNT_INPUT_0 , GPIO_NUM_0);
+    index_pcnt(PCNT_UNIT_1, PCNT_INPUT_1 , GPIO_NUM_0);
+    index_pcnt(PCNT_UNIT_2, PCNT_INPUT_2 , GPIO_NUM_0);
+    index_pcnt(PCNT_UNIT_3, PCNT_INPUT_3 , GPIO_NUM_0);
+    //int16_t count = 0;
     pcnt_evt_t evt;
     portBASE_TYPE res;
     while (1) {
         /* Wait for the event information passed from PCNT's interrupt handler.
          * Once received, decode the event type and print it on the serial monitor.
          */
-        res = xQueueReceive(pcnt_evt_queue, &evt, 1000 / portTICK_PERIOD_MS);
+        res = xQueueReceive(pcnt_evt_queue, &evt, 0 / portTICK_PERIOD_MS);
         if (res == pdTRUE) {
            // pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
            // printf("Event PCNT unit[%d]; cnt: %d\n", evt.unit, count);
             if (evt.status & PCNT_STATUS_H_LIM_M) {
-                printf("H_LIM EVT\n");
+               // printf("H_LIM EVT\n");
                 switch(evt.unit) {
                     case 0:
                         pcnt0_count++;
@@ -164,11 +156,11 @@ void pulse(void*pvParameters)
                         pcnt3_count++;
                         break;
                     default:
-                        break;
+                        break;   
                 }
             }
         } else {
-            pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
+            //pcnt_get_counter_value(unit, &count);
          //   printf("Current counter value :%d\n", count);
         }
      //   printf("procesor: %d\n", xPortGetCoreID());

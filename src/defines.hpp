@@ -43,7 +43,6 @@
 #define DIR_OUTPUT2         GPIO_NUM_2  //inicializace DIR pinu  //MUST BE LOW OR UNCONNECTED!!!
 #define LEDC_OUTPUT_IO3      GPIO_NUM_14  //inicializace STEP pinu
 #define DIR_OUTPUT3         GPIO_NUM_19  //inicializace DIR pinu
-#define PCNT_TEST_UNIT      PCNT_UNIT_0
 #define PCNT_INPUT_0        GPIO_NUM_12 //BOOT FAILS IF PULLED HIGH!!!
 #define PCNT_INPUT_1        GPIO_NUM_13
 #define PCNT_INPUT_2        GPIO_NUM_15
