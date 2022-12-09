@@ -218,13 +218,6 @@ extern "C" void app_main(void)
      printf("\n");
     Driver driver0 { drivers_uart, DRIVER_0_ADDRES, DRIVER_ENABLE };
     initDriver(driver0, 32, 32);
-   /* driver0.get_MSCNT(position0);
-    driver0.set_speed(motor_speed0);
-    driver0.read_gconf(gconf0);
-    driver0.get_DRV_STATUS(drvstatus0);
-    driver0.get_PWMCONF(pwmconf0);
-    driver0.get_SG(sgresult0);
-    driver0.get_MSCURACT(mscurrent0);*/
     printf("\n");
     Driver driver1 { drivers_uart, DRIVER_1_ADDRES, DRIVER_ENABLE };
     initDriver(driver1, 32, 32); 
@@ -239,10 +232,10 @@ extern "C" void app_main(void)
     driver3.set_speed(motor_speed3);
     printf("\n");
     
-    step_pulse_init(51200,LEDC_TIMER_0,LEDC_OUTPUT_IO0,LEDC_CHANNEL_0);
+   /* step_pulse_init(51200,LEDC_TIMER_0,LEDC_OUTPUT_IO0,LEDC_CHANNEL_0);
     step_pulse_init(1024,LEDC_TIMER_1,LEDC_OUTPUT_IO1,LEDC_CHANNEL_1);
     step_pulse_init(10240,LEDC_TIMER_2,LEDC_OUTPUT_IO2,LEDC_CHANNEL_2);
-    step_pulse_init(4096,LEDC_TIMER_3,LEDC_OUTPUT_IO3,LEDC_CHANNEL_3);//zapnuti STEP pulzů
+    step_pulse_init(4096,LEDC_TIMER_3,LEDC_OUTPUT_IO3,LEDC_CHANNEL_3);//zapnuti STEP pulzů*/
     gpio_set_level(DIR_OUTPUT0, 0);  //DIR
     gpio_set_level(DIR_OUTPUT1, 0);  //DIR
     gpio_set_level(DIR_OUTPUT2, 0);  //DIR
@@ -329,10 +322,10 @@ extern "C" void app_main(void)
     xTaskCreatePinnedToCore(pulse,"pulse counter",10000,NULL,1,&pulse_count,1); 
     vTaskDelay(1/portTICK_PERIOD_MS);
     
-       index_pcnt(PCNT_UNIT_0, PCNT_INPUT_0, DIR_OUTPUT0);
+     /*  index_pcnt(PCNT_UNIT_0, PCNT_INPUT_0, DIR_OUTPUT0);
        index_pcnt(PCNT_UNIT_1, PCNT_INPUT_1, DIR_OUTPUT1);
        index_pcnt(PCNT_UNIT_2, PCNT_INPUT_2, DIR_OUTPUT2);
-       index_pcnt(PCNT_UNIT_3, PCNT_INPUT_3, DIR_OUTPUT3);
+       index_pcnt(PCNT_UNIT_3, PCNT_INPUT_3, DIR_OUTPUT3);*/
     while(1){
         /*if(SILOVKA){
             esp_restart();
@@ -347,13 +340,13 @@ extern "C" void app_main(void)
         printf("KONCOVY_DOJEZD_3 %d\n", gpio_get_level(KONCOVY_DOJEZD_1));*/
         
         vTaskDelay(5/portTICK_PERIOD_MS);
-        driver0.set_speed(motor_speed0);
+        driver0.set_speed(608);
         vTaskDelay(5/portTICK_PERIOD_MS);
-        driver1.set_speed(motor_speed1);
+        driver1.set_speed(608);
         vTaskDelay(5/portTICK_PERIOD_MS);
-        driver2.set_speed(motor_speed2);
+        driver2.set_speed(608);
         vTaskDelay(5/portTICK_PERIOD_MS);
-        driver3.set_speed(motor_speed3);
+        driver3.set_speed(608);
         vTaskDelay(5/portTICK_PERIOD_MS);
          if(gpio_get_level(KONCOVY_DOJEZD_0)){
             ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
