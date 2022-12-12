@@ -159,6 +159,18 @@ void pulse(void*pvParameters)
                         break;   
                 }
             }
+            if(pcnt0_count == axis0_max || gpio_get_level(KONCOVY_DOJEZD_1)){
+                gpio_set_level(DIR_OUTPUT0, !motor0_rotation);
+            }
+            if(pcnt1_count == axis1_max || gpio_get_level(KONCOVY_DOJEZD_0)){
+                gpio_set_level(DIR_OUTPUT0, !motor1_rotation);
+            }
+            if(pcnt2_count == axis2_max || gpio_get_level(KONCOVY_DOJEZD_2)){
+                gpio_set_level(DIR_OUTPUT0, !motor2_rotation);
+            }
+            if(pcnt3_count == axis3_max || gpio_get_level(KONCOVY_DOJEZD_3)){
+                gpio_set_level(DIR_OUTPUT0, !motor3_rotation);
+            }
         } else {
             //pcnt_get_counter_value(unit, &count);
          //   printf("Current counter value :%d\n", count);

@@ -231,15 +231,20 @@ extern "C" void app_main(void)
     initDriver(driver3, 16, 32);
     driver3.set_speed(motor_speed3);
     printf("\n");
-    
-    step_pulse_init(25600,LEDC_TIMER_0,LEDC_OUTPUT_IO0,LEDC_CHANNEL_0);
-    step_pulse_init(25600,LEDC_TIMER_1,LEDC_OUTPUT_IO1,LEDC_CHANNEL_1);
-    step_pulse_init(25600,LEDC_TIMER_2,LEDC_OUTPUT_IO2,LEDC_CHANNEL_2);
-    step_pulse_init(25600,LEDC_TIMER_3,LEDC_OUTPUT_IO3,LEDC_CHANNEL_3);//zapnuti STEP pulzů
-    gpio_set_level(DIR_OUTPUT0, 0);
-    gpio_set_level(DIR_OUTPUT1, 0);
-    gpio_set_level(DIR_OUTPUT2, 0);
-    gpio_set_level(DIR_OUTPUT3, 0);
+
+    motor0_rotation=0;
+    motor1_rotation=0;
+    motor2_rotation=0;
+    motor3_rotation=1;
+
+    step_pulse_init(102400,LEDC_TIMER_0,LEDC_OUTPUT_IO0,LEDC_CHANNEL_0);
+    step_pulse_init(102400,LEDC_TIMER_1,LEDC_OUTPUT_IO1,LEDC_CHANNEL_1);//pcnt0_count
+    step_pulse_init(102400,LEDC_TIMER_2,LEDC_OUTPUT_IO2,LEDC_CHANNEL_2);
+    step_pulse_init(102400,LEDC_TIMER_3,LEDC_OUTPUT_IO3,LEDC_CHANNEL_3);//pcnt1_count
+    gpio_set_level(DIR_OUTPUT0, motor0_rotation);//0
+    gpio_set_level(DIR_OUTPUT1, motor1_rotation);//0
+    gpio_set_level(DIR_OUTPUT2, motor2_rotation);//0
+    gpio_set_level(DIR_OUTPUT3, motor3_rotation);//1
     //pcnt();
 	/*
 	bool otevrena_celist = 0;
@@ -359,26 +364,36 @@ extern "C" void app_main(void)
         vTaskDelay(5/portTICK_PERIOD_MS);
         driver3.set_speed(motor_speed3);
         vTaskDelay(5/portTICK_PERIOD_MS);
-         if(gpio_get_level(KONCOVY_DOJEZD_0)){
-            ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);//3
+       
+        if(gpio_get_level(KONCOVY_DOJEZD_1)){
+           // ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_2, 0);
+           // ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_3, 0);
+           // ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
+            ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
         }
-        if(gpio_get_level(KONCOVY_DOJEZD_1)){//čelist
-            ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
-        }
-        if(gpio_get_level(KONCOVY_DOJEZD_2)){
+         if(gpio_get_level(KONCOVY_DOJEZD_2)){
             ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_2, 0);
+           // ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_3, 0);
+           // ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
+           // ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
         }
-        if(gpio_get_level(KONCOVY_DOJEZD_3)){
-            ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_3, 0);//0
+         if(gpio_get_level(KONCOVY_DOJEZD_3)){
+           // ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_2, 0);
+            ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_3, 0);
+           // ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
+           // ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
         }
+         if(gpio_get_level(KONCOVY_DOJEZD_0)){
+          //  ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_2, 0);
+          //  ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_3, 0);
+            ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
+          //  ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
+        }
+    
        printf("pocet pulzu 0: %d\n",pcnt0_count); //50=1 otáčka (200step motor)
-       vTaskDelay(5/portTICK_PERIOD_MS);
        printf("pocet pulzu 1: %d\n",pcnt1_count);
-       vTaskDelay(5/portTICK_PERIOD_MS);
        printf("pocet pulzu 2: %d\n",pcnt2_count);
-       vTaskDelay(5/portTICK_PERIOD_MS);
        printf("pocet pulzu 3: %d\n",pcnt3_count);
-       vTaskDelay(5/portTICK_PERIOD_MS);
       /* if(pcnt0_count){
         ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
         ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
