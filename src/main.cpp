@@ -106,49 +106,56 @@ static void initDriver(Driver& driver, const int iRun, const int iHold) {
         printf("PWMCONF driveru %d : ERROR  %d\n", driver.address(), result);
     else
         printf("PWMCONF driveru %d =  %08X\n", driver.address(), data);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
 
     result = driver.get_DRV_STATUS(data);
     if (result != 0)
         printf("DRV_STATUS driveru %d : ERROR  %d\n", driver.address(), result);
     else
         printf("DRV_STATUS driveru %d =  %08X\n", driver.address(), data);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
 
     result = driver.get_MSCURACT(data);
     if (result != 0)
         printf("MSCURACT %d : ERROR  %d\n", driver.address(), result);
     else
         printf("MSCURACT %d =  %08X\n", driver.address(), data);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
 
     result = driver.read_gconf(data);
     if (result != 0)
         printf("GCONF %d : ERROR  %d\n", driver.address(), result);
     else
         printf("GCONF %d =  %08X\n", driver.address(), data);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
 
     result = driver.get_SG(data);
     if (result != 0)
         printf("STALLGUARD RESULT %d : ERROR  %d\n", driver.address(), result);
     else
         printf("STALLGUARD RESULT %d =  %08X\n", driver.address(), data);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
 
     result = driver.get_CHOPCONF(data);
     if (result != 0)
         printf("CHOPCONF %d : ERROR  %d\n", driver.address(), result);
     else
         printf("CHOPCONF %d =  %08X\n", driver.address(), data);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
     
     result = driver.get_GSTAT(data);
     if (result != 0)
         printf("GSTAT %d : ERROR  %d\n", driver.address(), result);
     else
         printf("GSTAT %d =  %08X\n", driver.address(), data);
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+
+    result = driver.get_MSCNT(data);
+    if (result != 0)
+        printf("MSCNT %d : ERROR  %d\n", driver.address(), result);
+    else
+        printf("MSCNT %d =  %08X\n", driver.address(), data);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
 
     driver.set_speed(0);                      // otáčení motoru se nastavuje zápisem rychlosti do driveru přes Uart
     driver.set_IHOLD_IRUN (16, 32);             // proud IHOLD (při stání) =8/32, IRUN (při běhu)= 8/32 (8/32 je minimum, 16/32 je maximum pro dluhodobější provoz)
@@ -237,10 +244,10 @@ extern "C" void app_main(void)
     motor2_rotation=0;
     motor3_rotation=1;
 
-    step_pulse_init(102400,LEDC_TIMER_0,LEDC_OUTPUT_IO0,LEDC_CHANNEL_0);
-    step_pulse_init(102400,LEDC_TIMER_1,LEDC_OUTPUT_IO1,LEDC_CHANNEL_1);//pcnt0_count
-    step_pulse_init(102400,LEDC_TIMER_2,LEDC_OUTPUT_IO2,LEDC_CHANNEL_2);
-    step_pulse_init(102400,LEDC_TIMER_3,LEDC_OUTPUT_IO3,LEDC_CHANNEL_3);//pcnt1_count
+    step_pulse_init(1024,LEDC_TIMER_0,LEDC_OUTPUT_IO0,LEDC_CHANNEL_0);
+    step_pulse_init(1024,LEDC_TIMER_1,LEDC_OUTPUT_IO1,LEDC_CHANNEL_1);//pcnt0_count
+    step_pulse_init(1024,LEDC_TIMER_2,LEDC_OUTPUT_IO2,LEDC_CHANNEL_2);
+    step_pulse_init(1024,LEDC_TIMER_3,LEDC_OUTPUT_IO3,LEDC_CHANNEL_3);//pcnt1_count
     gpio_set_level(DIR_OUTPUT0, motor0_rotation);//0
     gpio_set_level(DIR_OUTPUT1, motor1_rotation);//0
     gpio_set_level(DIR_OUTPUT2, motor2_rotation);//0
@@ -323,10 +330,10 @@ extern "C" void app_main(void)
 			otevrena_celist = 0;
 		}
         vTaskDelay(5/portTICK_PERIOD_MS);  */   
-    TaskHandle_t  pulse_count;
+ /*   TaskHandle_t  pulse_count;
     xTaskCreatePinnedToCore(pulse,"pulse counter",10000,NULL,1,&pulse_count,1); 
     vTaskDelay(1/portTICK_PERIOD_MS);
-    
+  */  
      /*  index_pcnt(PCNT_UNIT_0, PCNT_INPUT_0, DIR_OUTPUT0);
        index_pcnt(PCNT_UNIT_1, PCNT_INPUT_1, DIR_OUTPUT1);
        index_pcnt(PCNT_UNIT_2, PCNT_INPUT_2, DIR_OUTPUT2);
@@ -337,15 +344,6 @@ extern "C" void app_main(void)
             esp_restart();
             printf("Připojeno 12V:\n");
         }*/
-
-        printf("DIR_OUTPUT_0: %d\n",gpio_get_level(DIR_OUTPUT0));
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        printf("DIR_OUTPUT_1: %d\n",gpio_get_level(DIR_OUTPUT1));
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        printf("DIR_OUTPUT_2: %d\n",gpio_get_level(DIR_OUTPUT2));
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        printf("DIR_OUTPUT_3: %d\n",gpio_get_level(DIR_OUTPUT3));
-        vTaskDelay(5/portTICK_PERIOD_MS);
 
         printf("KONCOVY_DOJEZD_0 %d\n", gpio_get_level(KONCOVY_DOJEZD_0));
         vTaskDelay(5/portTICK_PERIOD_MS);
@@ -364,7 +362,7 @@ extern "C" void app_main(void)
         vTaskDelay(5/portTICK_PERIOD_MS);
         driver3.set_speed(motor_speed3);
         vTaskDelay(5/portTICK_PERIOD_MS);
-       
+      /*
         if(gpio_get_level(KONCOVY_DOJEZD_1)){
            // ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_2, 0);
            // ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_3, 0);
@@ -389,11 +387,19 @@ extern "C" void app_main(void)
             ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
           //  ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
         }
-    
-       printf("pocet pulzu 0: %d\n",pcnt0_count); //50=1 otáčka (200step motor)
-       printf("pocet pulzu 1: %d\n",pcnt1_count);
-       printf("pocet pulzu 2: %d\n",pcnt2_count);
-       printf("pocet pulzu 3: %d\n",pcnt3_count);
+    */
+        driver0.get_MSCNT(position0);
+        printf("MSCNT_MOTORU_0 %d\n", position0);
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        driver1.get_MSCNT(position1);
+        printf("MSCNT MOTORU1 %d\n", position1);
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        driver2.get_MSCNT(position2);
+        printf("MSCNT MOTORU2 %d\n", position2);
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        driver3.get_MSCNT(position3);
+        printf("MSCNT MOTORU3 %d\n", position3);
+        vTaskDelay(5/portTICK_PERIOD_MS);
       /* if(pcnt0_count){
         ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, 0);
         ledc_stop(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, 0);
@@ -403,19 +409,9 @@ extern "C" void app_main(void)
        // printf("POZICE_MOTORU_0 %u\n", position0);,
       /*  printf("SWITCH_0: %d\n",gpio_get_level(SWITCH_0));
         printf("SWITCH_1: %d\n",gpio_get_level(SWITCH_1));*/
-        vTaskDelay(10/portTICK_PERIOD_MS);
+        vTaskDelay(100/portTICK_PERIOD_MS);
     }
-       // printf("POZICE_MOTORU_0 %d\n", position0);
-       // vTaskDelay(5/portTICK_PERIOD_MS);
-       /* driver1.get_MSCNT(position1);
-        printf("POZICE MOTORU1 %d\n", posit)ion1);
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        driver2.get_MSCNT(position2);
-        printf("POZICE MOTORU2 %d\n", position2);
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        driver3.get_MSCNT(position3);
-        printf("POZICE MOTORU3 %d\n", position3);
-        vTaskDelay(5/portTICK_PERIOD_MS);*/
+        
         //pulse();
        /* printf("pocet pulzu: %d\n",pcnt0_count);
         vTaskDelay(1000/portTICK_PERIOD_MS);*/
