@@ -24,23 +24,19 @@ extern "C" {
 
 // ------------------------------------------------------------
 
-bool            flag_fan1          = true;                                                                   
-int16_t         pulses_fan1        = 0;                                                                          
+bool            flag_fan1          = true;                                                                                                                                            
 volatile int frequency_fan1     = 0;
 uint16_t result_fan1 = 0;
 
-bool            flag_fan2          = true;                                                                 
-int16_t         pulses_fan2        = 0;                                                                         
+bool            flag_fan2          = true;                                                                                                                                         
 volatile int frequency_fan2     = 0;
 uint16_t result_fan2 = 0;
 
-bool            flag_fan3          = true;                                                                    
-int16_t         pulses_fan3        = 0;                                                                          
+bool            flag_fan3          = true;                                                                                                                                              
 volatile int frequency_fan3     = 0;
 uint16_t result_fan3 = 0;
 
-bool            flag_fan4          = true;                                                                    
-int16_t         pulses_fan4        = 0;                                                                         
+bool            flag_fan4          = true;                                                                                                                                             
 volatile int frequency_fan4    = 0;
 uint16_t result_fan4 = 0;
 
@@ -72,8 +68,8 @@ pcnt_config_t pcnt_config_fan1 = {
   .lctrl_mode        = PCNT_MODE_KEEP,
   .hctrl_mode        = PCNT_MODE_KEEP,
   .pos_mode          = PCNT_COUNT_INC,
-  .neg_mode          = PCNT_COUNT_INC,
-  .counter_h_lim     = 1000,
+  .neg_mode          = PCNT_COUNT_DIS,
+  .counter_h_lim     = 25,
   .counter_l_lim     = 0,
   .unit              = PCNT_UNIT_0, 
   .channel           = PCNT_CHANNEL_0
@@ -86,8 +82,8 @@ pcnt_config_t pcnt_config_fan1 = {
   .lctrl_mode        = PCNT_MODE_KEEP,
   .hctrl_mode        = PCNT_MODE_KEEP,
   .pos_mode          = PCNT_COUNT_INC,
-  .neg_mode          = PCNT_COUNT_INC,
-  .counter_h_lim     = 1000,
+  .neg_mode          = PCNT_COUNT_DIS,
+  .counter_h_lim     = 25,
   .counter_l_lim     = 0,
   .unit              = PCNT_UNIT_1, 
   .channel           = PCNT_CHANNEL_0
@@ -100,8 +96,8 @@ pcnt_config_t pcnt_config_fan1 = {
   .lctrl_mode        = PCNT_MODE_KEEP,
   .hctrl_mode        = PCNT_MODE_KEEP,
   .pos_mode          = PCNT_COUNT_INC,
-  .neg_mode          = PCNT_COUNT_INC,
-  .counter_h_lim     = 1000,
+  .neg_mode          = PCNT_COUNT_DIS,
+  .counter_h_lim     = 25,
   .counter_l_lim     = 0,
   .unit              = PCNT_UNIT_2, 
   .channel           = PCNT_CHANNEL_0
@@ -114,8 +110,8 @@ pcnt_config_t pcnt_config_fan1 = {
   .lctrl_mode        = PCNT_MODE_KEEP,
   .hctrl_mode        = PCNT_MODE_KEEP,
   .pos_mode          = PCNT_COUNT_INC,
-  .neg_mode          = PCNT_COUNT_INC,
-  .counter_h_lim     = 1000,
+  .neg_mode          = PCNT_COUNT_DIS,
+  .counter_h_lim     = 25,
   .counter_l_lim     = 0,
   .unit              = PCNT_UNIT_3, 
   .channel           = PCNT_CHANNEL_0
@@ -186,8 +182,8 @@ void pcnt_init_fan1(void)
 
   pcnt_unit_config(&pcnt_config_fan1);
   pcnt_isr_register(pcnt_event_handler_fan1, NULL, 0, NULL);                   
-  pcnt_set_filter_value(PCNT_UNIT_0, 1000);
-  pcnt_filter_enable(PCNT_UNIT_0); 
+  //pcnt_set_filter_value(PCNT_UNIT_0, 1000);
+  //pcnt_filter_enable(PCNT_UNIT_0); 
   pcnt_counter_pause(PCNT_UNIT_0);                                       
   pcnt_counter_clear(PCNT_UNIT_0);                                       
   pcnt_event_enable(PCNT_UNIT_0, PCNT_EVT_H_LIM);                        
@@ -212,8 +208,8 @@ void pcnt_init_fan2(void)
   pcnt_unit_config(&pcnt_config_fan2);
   pcnt_isr_register(pcnt_event_handler_fan2, NULL, 0, NULL);               
   pcnt_intr_enable(PCNT_UNIT_1);  
-  pcnt_set_filter_value(PCNT_UNIT_1, 1000);
-  pcnt_filter_enable(PCNT_UNIT_1); 
+  //pcnt_set_filter_value(PCNT_UNIT_1, 1000);
+  //pcnt_filter_enable(PCNT_UNIT_1); 
   pcnt_counter_pause(PCNT_UNIT_1);                                      
   pcnt_counter_clear(PCNT_UNIT_1);                                      
   pcnt_event_enable(PCNT_UNIT_1, PCNT_EVT_H_LIM);                        
@@ -233,8 +229,8 @@ void pcnt_init_fan3(void)
   pcnt_unit_config(&pcnt_config_fan3);
   pcnt_isr_register(pcnt_event_handler_fan3, NULL, 0, NULL);
   pcnt_intr_enable(PCNT_UNIT_2);  
-  pcnt_set_filter_value(PCNT_UNIT_2, 1000);
-  pcnt_filter_enable(PCNT_UNIT_2); 
+  //pcnt_set_filter_value(PCNT_UNIT_2, 1000);
+  //pcnt_filter_enable(PCNT_UNIT_2); 
   pcnt_counter_pause(PCNT_UNIT_2);                                       
   pcnt_counter_clear(PCNT_UNIT_2);                                        
   pcnt_event_enable(PCNT_UNIT_2, PCNT_EVT_H_LIM);                        
@@ -254,8 +250,8 @@ void pcnt_init_fan4(void)
   pcnt_unit_config(&pcnt_config_fan4);
   pcnt_isr_register(pcnt_event_handler_fan4, NULL, 0, NULL);
   pcnt_intr_enable(PCNT_UNIT_3);  
-  pcnt_set_filter_value(PCNT_UNIT_3, 1000);
-  pcnt_filter_enable(PCNT_UNIT_3); 
+ //pcnt_set_filter_value(PCNT_UNIT_3, 1000);
+ //pcnt_filter_enable(PCNT_UNIT_3); 
   pcnt_counter_pause(PCNT_UNIT_3);                                       
   pcnt_counter_clear(PCNT_UNIT_3);                                        
   pcnt_event_enable(PCNT_UNIT_3, PCNT_EVT_H_LIM);                        
