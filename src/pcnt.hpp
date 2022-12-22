@@ -17,46 +17,358 @@
 #include "driver/periph_ctrl.h"
 #include "defines.hpp"
 
+#include "driver/pcnt.h"                                                
+#include "soc/pcnt_struct.h"
 
+extern "C" {
 
-extern "C"{
+// ------------------------------------------------------------
 
-    xQueueHandle pcnt_evt_queue;   // A queue to handle pulse counter events
-    pcnt_isr_handle_t user_isr_handle = NULL; //user's ISR service handle
+bool            flag_fan1          = true;                                                                   
+int16_t         pulses_fan1        = 0;                                                                          
+volatile int frequency_fan1     = 0;
+uint16_t result_fan1 = 0;
 
-    /* A sample structure to pass events from the PCNT
-    * interrupt handler to the main program.
-    */
-    typedef struct {
-        int unit;  // the PCNT unit that originated an interrupt
-        uint32_t status; // information on the event type that caused the interrupt
-    } pcnt_evt_t;
+bool            flag_fan2          = true;                                                                 
+int16_t         pulses_fan2        = 0;                                                                         
+volatile int frequency_fan2     = 0;
+uint16_t result_fan2 = 0;
 
-    /* Decode what PCNT's unit originated an interrupt
-    * and pass this information together with the event type
-    * the main program using a queue.
-    */
-    static void IRAM_ATTR pcnt_example_intr_handler(void *arg)
-    {
-        uint32_t intr_status = PCNT.int_st.val;
-        int i;
-        pcnt_evt_t evt;
-        portBASE_TYPE HPTaskAwoken = pdFALSE;
+bool            flag_fan3          = true;                                                                    
+int16_t         pulses_fan3        = 0;                                                                          
+volatile int frequency_fan3     = 0;
+uint16_t result_fan3 = 0;
 
-        for (i = 0; i < PCNT_UNIT_MAX; i++) {
-            if (intr_status & (BIT(i))) {
-                evt.unit = i;
-                /* Save the PCNT event type that caused an interrupt
-                to pass it to the main program */
-                evt.status = PCNT.status_unit[i].val;
-                PCNT.int_clr.val = BIT(i);
-                xQueueSendFromISR(pcnt_evt_queue, &evt, &HPTaskAwoken);
-                if (HPTaskAwoken == pdTRUE) {
-                    portYIELD_FROM_ISR();
-                }
-            }
-        }
-    }
+bool            flag_fan4          = true;                                                                    
+int16_t         pulses_fan4        = 0;                                                                         
+volatile int frequency_fan4    = 0;
+uint16_t result_fan4 = 0;
+
+volatile double average_fans = 0;
+
+// ------------------------------------------------------------
+
+esp_timer_create_args_t timer_args_fan1;                                   
+esp_timer_handle_t timer_handle_fan1;                                       
+portMUX_TYPE timer_mux_fan1 = portMUX_INITIALIZER_UNLOCKED;
+
+esp_timer_create_args_t timer_args_fan2;                                    
+esp_timer_handle_t timer_handle_fan2;                                          
+portMUX_TYPE timer_mux_fan2 = portMUX_INITIALIZER_UNLOCKED;
+
+esp_timer_create_args_t timer_args_fan3;                                    
+esp_timer_handle_t timer_handle_fan3;                                          
+portMUX_TYPE timer_mux_fan3 = portMUX_INITIALIZER_UNLOCKED;
+
+esp_timer_create_args_t timer_args_fan4;                                    
+esp_timer_handle_t timer_handle_fan4;                                          
+portMUX_TYPE timer_mux_fan4 = portMUX_INITIALIZER_UNLOCKED;
+
+// ------------------------------------------------------------
+
+pcnt_config_t pcnt_config_fan1 = {
+  .pulse_gpio_num    = PCNT_INPUT_0,
+  .ctrl_gpio_num     = -1,
+  .lctrl_mode        = PCNT_MODE_KEEP,
+  .hctrl_mode        = PCNT_MODE_KEEP,
+  .pos_mode          = PCNT_COUNT_INC,
+  .neg_mode          = PCNT_COUNT_INC,
+  .counter_h_lim     = 1000,
+  .counter_l_lim     = 0,
+  .unit              = PCNT_UNIT_0, 
+  .channel           = PCNT_CHANNEL_0
+  };
+
+  pcnt_config_t pcnt_config_fan2 = 
+  {
+  .pulse_gpio_num    = PCNT_INPUT_1,
+  .ctrl_gpio_num     = -1,
+  .lctrl_mode        = PCNT_MODE_KEEP,
+  .hctrl_mode        = PCNT_MODE_KEEP,
+  .pos_mode          = PCNT_COUNT_INC,
+  .neg_mode          = PCNT_COUNT_INC,
+  .counter_h_lim     = 1000,
+  .counter_l_lim     = 0,
+  .unit              = PCNT_UNIT_1, 
+  .channel           = PCNT_CHANNEL_0
+  };
+
+  pcnt_config_t pcnt_config_fan3 = 
+  {
+  .pulse_gpio_num    = PCNT_INPUT_2,
+  .ctrl_gpio_num     = -1,
+  .lctrl_mode        = PCNT_MODE_KEEP,
+  .hctrl_mode        = PCNT_MODE_KEEP,
+  .pos_mode          = PCNT_COUNT_INC,
+  .neg_mode          = PCNT_COUNT_INC,
+  .counter_h_lim     = 1000,
+  .counter_l_lim     = 0,
+  .unit              = PCNT_UNIT_2, 
+  .channel           = PCNT_CHANNEL_0
+  };
+
+  pcnt_config_t pcnt_config_fan4 = 
+  {
+  .pulse_gpio_num    = PCNT_INPUT_3,
+  .ctrl_gpio_num     = -1,
+  .lctrl_mode        = PCNT_MODE_KEEP,
+  .hctrl_mode        = PCNT_MODE_KEEP,
+  .pos_mode          = PCNT_COUNT_INC,
+  .neg_mode          = PCNT_COUNT_INC,
+  .counter_h_lim     = 1000,
+  .counter_l_lim     = 0,
+  .unit              = PCNT_UNIT_3, 
+  .channel           = PCNT_CHANNEL_0
+  };
+
+// ------------------------------------------------------------
+
+void IRAM_ATTR pcnt_event_handler_fan1(void *arg)
+{
+  portENTER_CRITICAL_ISR(&timer_mux_fan1);
+  PCNT.int_clr.val = BIT(PCNT_UNIT_0);
+  portEXIT_CRITICAL_ISR(&timer_mux_fan1);
+}     
+
+void IRAM_ATTR pcnt_event_handler_fan2(void *arg) 
+{
+  portENTER_CRITICAL_ISR(&timer_mux_fan2); 
+  PCNT.int_clr.val = BIT(PCNT_UNIT_1); 
+  portEXIT_CRITICAL_ISR(&timer_mux_fan2); 
+}  
+
+void IRAM_ATTR pcnt_event_handler_fan3(void *arg)
+{
+  portENTER_CRITICAL_ISR(&timer_mux_fan3); 
+  PCNT.int_clr.val = BIT(PCNT_UNIT_2); 
+  portEXIT_CRITICAL_ISR(&timer_mux_fan3);
+}
+
+void IRAM_ATTR pcnt_event_handler_fan4(void *arg)
+{
+  portENTER_CRITICAL_ISR(&timer_mux_fan4); 
+  PCNT.int_clr.val = BIT(PCNT_UNIT_3); 
+  portEXIT_CRITICAL_ISR(&timer_mux_fan4);
+}
+
+void pcnt_get_counter_fan1(void *p) 
+{ 
+  pcnt_counter_pause(PCNT_UNIT_0);
+  pcnt_get_counter_value(PCNT_UNIT_0, (int16_t*) &result_fan1); 
+  flag_fan1 = true;
+}
+
+void pcnt_get_counter_fan2(void *p) 
+{ 
+  pcnt_counter_pause(PCNT_UNIT_1);
+  pcnt_get_counter_value(PCNT_UNIT_1, (int16_t*) &result_fan2); 
+  flag_fan2 = true;
+}
+
+void pcnt_get_counter_fan3(void *p) 
+{ 
+  pcnt_counter_pause(PCNT_UNIT_2);
+  pcnt_get_counter_value(PCNT_UNIT_2, (int16_t*) &result_fan3); 
+  flag_fan3 = true;
+}
+
+void pcnt_get_counter_fan4(void *p) 
+{ 
+  pcnt_counter_pause(PCNT_UNIT_3);
+  pcnt_get_counter_value(PCNT_UNIT_3, (int16_t*) &result_fan4); 
+  flag_fan4 = true;
+}
+
+// ------------------------------------------------------------ 
+
+void pcnt_init_fan1(void)                                                     
+{  
+
+  pcnt_unit_config(&pcnt_config_fan1);
+  pcnt_isr_register(pcnt_event_handler_fan1, NULL, 0, NULL);                   
+  pcnt_set_filter_value(PCNT_UNIT_0, 1000);
+  pcnt_filter_enable(PCNT_UNIT_0); 
+  pcnt_counter_pause(PCNT_UNIT_0);                                       
+  pcnt_counter_clear(PCNT_UNIT_0);                                       
+  pcnt_event_enable(PCNT_UNIT_0, PCNT_EVT_H_LIM);                        
+  pcnt_counter_resume(PCNT_UNIT_0);                                       
+
+  timer_args_fan1.callback = pcnt_get_counter_fan1;
+  timer_args_fan1.arg      = NULL;
+  timer_args_fan1.name     = "one shot timer";
+
+ /* if(esp_timer_create(&timer_args_fan1, &timer_handle_fan1) != ESP_OK) 
+  {
+    ESP_LOGE(TAG,"timer create");
+  }*/
+
+  timer_args_fan1.callback = pcnt_get_counter_fan1; 
+  esp_timer_create(&timer_args_fan1, &timer_handle_fan1);                           
+}
+
+void pcnt_init_fan2(void)                                                     
+{ 
+
+  pcnt_unit_config(&pcnt_config_fan2);
+  pcnt_isr_register(pcnt_event_handler_fan2, NULL, 0, NULL);               
+  pcnt_intr_enable(PCNT_UNIT_1);  
+  pcnt_set_filter_value(PCNT_UNIT_1, 1000);
+  pcnt_filter_enable(PCNT_UNIT_1); 
+  pcnt_counter_pause(PCNT_UNIT_1);                                      
+  pcnt_counter_clear(PCNT_UNIT_1);                                      
+  pcnt_event_enable(PCNT_UNIT_1, PCNT_EVT_H_LIM);                        
+  pcnt_counter_resume(PCNT_UNIT_1);                                    
+
+  timer_args_fan2.callback = pcnt_get_counter_fan2;
+  timer_args_fan2.arg      = NULL;
+  timer_args_fan2.name     = "one shot timer";
+
+  timer_args_fan2.callback = pcnt_get_counter_fan2;
+  esp_timer_create(&timer_args_fan2, &timer_handle_fan2); 
+}
+
+void pcnt_init_fan3(void)                                                     
+{  
+
+  pcnt_unit_config(&pcnt_config_fan3);
+  pcnt_isr_register(pcnt_event_handler_fan3, NULL, 0, NULL);
+  pcnt_intr_enable(PCNT_UNIT_2);  
+  pcnt_set_filter_value(PCNT_UNIT_2, 1000);
+  pcnt_filter_enable(PCNT_UNIT_2); 
+  pcnt_counter_pause(PCNT_UNIT_2);                                       
+  pcnt_counter_clear(PCNT_UNIT_2);                                        
+  pcnt_event_enable(PCNT_UNIT_2, PCNT_EVT_H_LIM);                        
+  pcnt_counter_resume(PCNT_UNIT_2);                                       
+
+  timer_args_fan3.callback = pcnt_get_counter_fan3;
+  timer_args_fan3.arg      = NULL;
+  timer_args_fan3.name     = "one shot timer";
+
+  timer_args_fan3.callback = pcnt_get_counter_fan3;
+  esp_timer_create(&timer_args_fan3, &timer_handle_fan3); 
+}
+
+void pcnt_init_fan4(void)                                                     
+{  
+
+  pcnt_unit_config(&pcnt_config_fan4);
+  pcnt_isr_register(pcnt_event_handler_fan4, NULL, 0, NULL);
+  pcnt_intr_enable(PCNT_UNIT_3);  
+  pcnt_set_filter_value(PCNT_UNIT_3, 1000);
+  pcnt_filter_enable(PCNT_UNIT_3); 
+  pcnt_counter_pause(PCNT_UNIT_3);                                       
+  pcnt_counter_clear(PCNT_UNIT_3);                                        
+  pcnt_event_enable(PCNT_UNIT_3, PCNT_EVT_H_LIM);                        
+  pcnt_counter_resume(PCNT_UNIT_3);                                       
+
+  timer_args_fan4.callback = pcnt_get_counter_fan4;
+  timer_args_fan4.arg      = NULL;
+  timer_args_fan4.name     = "one shot timer";
+
+  timer_args_fan4.callback = pcnt_get_counter_fan4;
+  esp_timer_create(&timer_args_fan4, &timer_handle_fan4); 
+}
+
+// ------------------------------------------------------------
+
+void pulse(void*pvParameters){
+   while(1){ 
+
+    if (flag_fan1 == true /*&& gpio_get_level(DIR_OUTPUT0)*/)
+  {
+    flag_fan1 = false;
+    frequency_fan1 =  result_fan1 /*+ (overflow_cnt_fan1*20000)*/; 
+    pcnt_counter_clear(PCNT_UNIT_0); 
+    pcnt_counter_resume(PCNT_UNIT_0); 
+    count0=frequency_fan1+count0;
+    esp_timer_start_once(timer_handle_fan1, 1000000);
+    pcnt_counter_clear(PCNT_UNIT_0);
+  }
+
+   /*else{
+    flag_fan1 = false;
+    frequency_fan1 =  result_fan1 + (overflow_cnt_fan1*20000); 
+    overflow_cnt_fan1 = 0; 
+    pcnt_counter_clear(PCNT_UNIT_0); 
+    pcnt_counter_resume(PCNT_UNIT_0); 
+    overflow_cnt_fan1 = 0;    
+    //printf("RPM FAN1: %d\n",frequency_fan1);
+    count0=count0-frequency_fan1;
+    esp_timer_start_once(timer_handle_fan1, 1000000);
+    pcnt_counter_clear(PCNT_UNIT_0);
+   }*/
+
+  if (flag_fan2 == true /*&& gpio_get_level(DIR_OUTPUT1)*/)
+  {
+    flag_fan2 = false;
+    frequency_fan2 =  result_fan2 /*+ (overflow_cnt_fan2 * 20000)*/; 
+    pcnt_counter_clear(PCNT_UNIT_1); 
+    pcnt_counter_resume(PCNT_UNIT_1); 
+   count1=frequency_fan2+count1;
+    esp_timer_start_once(timer_handle_fan2, 1000000);
+    pcnt_counter_clear(PCNT_UNIT_1);
+  }
+   /*else{flag_fan2 = false;
+    frequency_fan2 =  result_fan2 + (overflow_cnt_fan2 * 20000); 
+    overflow_cnt_fan2 = 0; 
+    pcnt_counter_clear(PCNT_UNIT_1); 
+    pcnt_counter_resume(PCNT_UNIT_1); 
+    overflow_cnt_fan2 = 0;    
+   //printf("RPM FAN2: %d\n",frequency_fan2);
+   count1=count1-frequency_fan2;
+    esp_timer_start_once(timer_handle_fan2, 1000000);
+    pcnt_counter_clear(PCNT_UNIT_1);
+    
+   }*/
+
+  if (flag_fan3 == true /*&& gpio_get_level(DIR_OUTPUT2)*/)
+  {
+    flag_fan3 = false;
+    frequency_fan3 =  result_fan3 /*+ (overflow_cnt_fan3 * 20000)*/; 
+    pcnt_counter_clear(PCNT_UNIT_2); 
+    pcnt_counter_resume(PCNT_UNIT_2); 
+    count2=frequency_fan3+count2;
+    esp_timer_start_once(timer_handle_fan3, 1000000);
+    pcnt_counter_clear(PCNT_UNIT_2);
+  }
+   /*else{
+    flag_fan3 = false;
+    frequency_fan3 =  result_fan3 + (overflow_cnt_fan3 * 20000); 
+    overflow_cnt_fan3 = 0; 
+    pcnt_counter_clear(PCNT_UNIT_2); 
+    pcnt_counter_resume(PCNT_UNIT_2); 
+    overflow_cnt_fan3 = 0;    
+    //printf("RPM FAN3: %d\n",frequency_fan3);
+    count2=count2-frequency_fan3;
+    esp_timer_start_once(timer_handle_fan3, 1000000);
+    pcnt_counter_clear(PCNT_UNIT_2);
+   }*/
+    
+
+  if (flag_fan4 == true /*&& gpio_get_level(DIR_OUTPUT3)*/)
+  {
+    flag_fan4 = false;
+    frequency_fan4 =  result_fan4 /*+ (overflow_cnt_fan4 * 20000)*/; 
+    pcnt_counter_clear(PCNT_UNIT_3); 
+    pcnt_counter_resume(PCNT_UNIT_3); 
+    count3=frequency_fan4+count3;
+    esp_timer_start_once(timer_handle_fan4, 1000000);
+    pcnt_counter_clear(PCNT_UNIT_3);
+  }
+/*else{
+    flag_fan4 = false;
+    frequency_fan4 =  result_fan4 + (overflow_cnt_fan4 * 20000); 
+    overflow_cnt_fan4 = 0; 
+    pcnt_counter_clear(PCNT_UNIT_3); 
+    pcnt_counter_resume(PCNT_UNIT_3); 
+    overflow_cnt_fan4 = 0;    
+    //printf("RPM FAN4: %d\n",frequency_fan4);
+    count3=count3-frequency_fan4;
+    esp_timer_start_once(timer_handle_fan4, 1000000);
+    pcnt_counter_clear(PCNT_UNIT_3);
+}*/
+   }
+}
 
 void step_pulse_init(const uint32_t freq_hz, const ledc_timer_t timer_num, const gpio_num_t ledc_output, const ledc_channel_t channel)
 {
@@ -82,105 +394,5 @@ void step_pulse_init(const uint32_t freq_hz, const ledc_timer_t timer_num, const
         .hpoint     = 0,
     };    
     ledc_channel_config(&ledc_channel);
-}
-
- void index_pcnt(const pcnt_unit_t unit, const gpio_num_t pcnt_input, const gpio_num_t pcnt_ctrl){
-    /* Prepare configuration for the PCNT unit */
-        pcnt_config_t pcnt_config = {
-        .pulse_gpio_num = pcnt_input,
-        .ctrl_gpio_num = pcnt_ctrl,
-        .lctrl_mode = PCNT_MODE_DISABLE, // Reverse counting direction if low
-        .hctrl_mode = PCNT_MODE_KEEP,    // Keep the primary counter mode if high
-        .pos_mode = PCNT_COUNT_INC,   // Count up on the positive edge
-        .neg_mode = PCNT_COUNT_DIS,   // Keep the counter value on the negative edge
-        .counter_h_lim = PCNT_H_LIM_VAL,
-        .counter_l_lim = PCNT_L_LIM_VAL,
-        .unit = unit,
-        .channel = PCNT_CHANNEL_0,
-        };
-    pcnt_unit_config(&pcnt_config);
-    /* Initialize PCNT unit */
-    /* Set threshold 0 and 1 values and enable events to watch */
-  //  pcnt_set_event_value(PCNT_TEST_UNIT, PCNT_EVT_TH//RES_1, PCNT_THRES//H1_VAL);
-    pcnt_event_enable(unit, PCNT_EVT_H_LIM);
- 
-    /* Initialize PCNT's counter */
-    pcnt_counter_pause(unit);
-    pcnt_counter_clear(unit);
-
-    /* Register ISR handler and enable interrupts for PCNT unit */
-    pcnt_isr_register(pcnt_example_intr_handler, NULL, 0, &user_isr_handle);
-    pcnt_intr_enable(unit);
-
-    /* Everything is set up, now go to counting */
-    pcnt_counter_resume(unit);
-    }
-
-
-void pulse(void*pvParameters)
-{
-    //vTaskDelay(1/portTICK_PERIOD_MS);
-    /* Initialize LEDC to generate sample pulse signal */
-   // ledc_init();
-    /* Initialize PCNT event queue and PCNT functions */
-    pcnt_evt_queue = xQueueCreate(10, sizeof(pcnt_evt_t));
-    //pcnt_example_init();
-    index_pcnt(PCNT_UNIT_0, PCNT_INPUT_0 , GPIO_NUM_0);
-    index_pcnt(PCNT_UNIT_1, PCNT_INPUT_1 , GPIO_NUM_0);
-    index_pcnt(PCNT_UNIT_2, PCNT_INPUT_2 , GPIO_NUM_0);
-    index_pcnt(PCNT_UNIT_3, PCNT_INPUT_3 , GPIO_NUM_0);
-    //int16_t count = 0;
-    pcnt_evt_t evt;
-    portBASE_TYPE res;
-    while (1) {
-        /* Wait for the event information passed from PCNT's interrupt handler.
-         * Once received, decode the event type and print it on the serial monitor.
-         */
-        res = xQueueReceive(pcnt_evt_queue, &evt, 0 / portTICK_PERIOD_MS);
-        if (res == pdTRUE) {
-           // pcnt_get_counter_value(PCNT_TEST_UNIT, &count);
-           // printf("Event PCNT unit[%d]; cnt: %d\n", evt.unit, count);
-            if (evt.status & PCNT_STATUS_H_LIM_M) {
-               // printf("H_LIM EVT\n");
-                switch(evt.unit) {
-                    case 0:
-                        pcnt0_count++;
-                        break;
-                    case 1:
-                        pcnt1_count++;
-                        break;
-                    case 2:
-                        pcnt2_count++;
-                        break;
-                    case 3:
-                        pcnt3_count++;
-                        break;
-                    default:
-                        break;   
-                }
-            }
-            if(pcnt0_count == axis0_max || gpio_get_level(KONCOVY_DOJEZD_1)){
-                gpio_set_level(DIR_OUTPUT0, !motor0_rotation);
-            }
-            if(pcnt1_count == axis1_max || gpio_get_level(KONCOVY_DOJEZD_0)){
-                gpio_set_level(DIR_OUTPUT0, !motor1_rotation);
-            }
-            if(pcnt2_count == axis2_max || gpio_get_level(KONCOVY_DOJEZD_2)){
-                gpio_set_level(DIR_OUTPUT0, !motor2_rotation);
-            }
-            if(pcnt3_count == axis3_max || gpio_get_level(KONCOVY_DOJEZD_3)){
-                gpio_set_level(DIR_OUTPUT0, !motor3_rotation);
-            }
-        } else {
-            //pcnt_get_counter_value(unit, &count);
-         //   printf("Current counter value :%d\n", count);
-        }
-     //   printf("procesor: %d\n", xPortGetCoreID());
-    }
-    if(user_isr_handle) {
-        //Free the ISR service handle.
-        esp_intr_free(user_isr_handle);
-        user_isr_handle = NULL;
-    }    
 }
 }

@@ -47,8 +47,7 @@
 #define PCNT_INPUT_1        GPIO_NUM_13
 #define PCNT_INPUT_2        GPIO_NUM_15
 #define PCNT_INPUT_3        GPIO_NUM_18
-#define PCNT_H_LIM_VAL      25
-#define PCNT_L_LIM_VAL     -25
+#define PCNT_H_LIM_VAL      1
 volatile int pcnt0_count = 0;
 volatile int pcnt1_count = 0;
 volatile int pcnt2_count = 0;
@@ -83,10 +82,10 @@ int axis0_max;
 int axis1_max;
 int axis2_max;
 int axis3_max;
-uint32_t motor0_rotation;
-uint32_t motor1_rotation;
-uint32_t motor2_rotation;
-uint32_t motor3_rotation;
+int count0;
+int count1;
+int count2;
+int count3;
 uint32_t mscurrent0;
 uint32_t drvstatus0;
 uint32_t pwmconf0;
