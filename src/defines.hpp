@@ -5,55 +5,45 @@
 #define DRIVER_2_ADDRES           2
 #define DRIVER_3_ADDRES           3
 
-#define DRIVER_ENABLE           GPIO_NUM_23   // H= disable motor output
-
-#define VCC_IO                  GPIO_NUM_33  // L = reset driver 0, H = driver0 on
-//#define VCC_IO_1                  GPIO_NUM_33  // L = reset driver 0, H = driver0 on
-//#define VCC_IO_2                  GPIO_NUM_33  // L = reset driver 0, H = driver0 on
-//#define VCC_IO_3                  GPIO_NUM_33  // L = reset driver 0, H = driver0 on
+//#define VCC_IO                      GPIO_NUM_14
 
 #define SW_CTRL                   GPIO_NUM_32  // L = transistor Q3 off -> motor power off, H = all drivers on
+
+#define ENN_PIN0                   GPIO_NUM_33
+#define ENN_PIN1                   GPIO_NUM_25
+#define ENN_PIN2                   GPIO_NUM_26
+#define ENN_PIN3                   GPIO_NUM_27
+
+#define SILOVKA                    GPIO_NUM_4
 
 #define KONCOVY_DOJEZD_0          GPIO_NUM_35
 #define KONCOVY_DOJEZD_1          GPIO_NUM_34
 #define KONCOVY_DOJEZD_2          GPIO_NUM_39
 #define KONCOVY_DOJEZD_3          GPIO_NUM_36
 
-#define SWITCH_0        GPIO_NUM_25
-#define SWITCH_1        GPIO_NUM_22
+/*#define SWITCH_0        GPIO_NUM_25
+#define SWITCH_1        GPIO_NUM_22*/
 
-//#define SILOVKA         GPIO......
 
-/*#define PCNT_TEST_UNIT      PCNT_UNIT_0
-#define PCNT_H_LIM_VAL      10
-#define PCNT_L_LIM_VAL     -10
-#define PCNT_THRESH1_VAL    5
-#define PCNT_THRESH0_VAL   -5
-#define PCNT_INPUT_SIG_IO0   4  // Pulse Input GPIO
-#define PCNT_INPUT_SIG_IO1     // Pulse Input GPIO
-#define PCNT_INPUT_SIG_IO2     // Pulse Input GPIO
-#define PCNT_INPUT_SIG_IO3     // Pulse Input GPIO
-#define PCNT_INPUT_CTRL_IO  5  // Control GPIO HIGH=count up, LOW=count down*/
-
-#define LEDC_OUTPUT_IO0     GPIO_NUM_5  //inicializace STEP pinu
+/*#define LEDC_OUTPUT_IO0     GPIO_NUM_5  //inicializace STEP pinu
 #define DIR_OUTPUT0         GPIO_NUM_4  //inicializace DIR pinu
 #define LEDC_OUTPUT_IO1      GPIO_NUM_26  //inicializace STEP pinu
 #define DIR_OUTPUT1         GPIO_NUM_21  //inicializace DIR pinu
 #define LEDC_OUTPUT_IO2      GPIO_NUM_27  //inicializace STEP pinu
 #define DIR_OUTPUT2         GPIO_NUM_2  //inicializace DIR pinu  //MUST BE LOW OR UNCONNECTED!!!
 #define LEDC_OUTPUT_IO3      GPIO_NUM_14  //inicializace STEP pinu
-#define DIR_OUTPUT3         GPIO_NUM_19  //inicializace DIR pinu
+#define DIR_OUTPUT3         GPIO_NUM_19  //inicializace DIR pinu*/
 #define PCNT_INPUT_0        GPIO_NUM_12 //BOOT FAILS IF PULLED HIGH!!!
 #define PCNT_INPUT_1        GPIO_NUM_13
 #define PCNT_INPUT_2        GPIO_NUM_15
 #define PCNT_INPUT_3        GPIO_NUM_18
-#define PCNT_H_LIM_VAL      1
+//#define PCNT_H_LIM_VAL      1
 volatile int pcnt0_count = 0;
 volatile int pcnt1_count = 0;
 volatile int pcnt2_count = 0;
 volatile int pcnt3_count = 0;
 
-#define GPIO_BIT_MASK_INPUTS ((1ULL<<KONCOVY_DOJEZD_0) | (1ULL<<KONCOVY_DOJEZD_1) | (1ULL<<KONCOVY_DOJEZD_2) | (1ULL<<KONCOVY_DOJEZD_3) | (1ULL<<SWITCH_0) | (1ULL<<SWITCH_1))
+#define GPIO_BIT_MASK_INPUTS ((1ULL<<KONCOVY_DOJEZD_0) | (1ULL<<KONCOVY_DOJEZD_1) | (1ULL<<KONCOVY_DOJEZD_2) | (1ULL<<KONCOVY_DOJEZD_3) | (1ULL<<SILOVKA)/*| (1ULL<<SWITCH_0) | (1ULL<<SWITCH_1)*/)
 
 #define DRIVERS_UART              UART_NUM_1
 #define DRIVERS_UART_TXD          GPIO_NUM_17 
@@ -62,7 +52,7 @@ volatile int pcnt3_count = 0;
 #define DRIVERS_RX_TIMEOUT        (20 / portTICK_RATE_MS)
 #define DRIVERS_UART_START_BYTE   0x05
 
-#define GPIO_OUTPUT_PIN_SEL ((1ULL<<DRIVER_ENABLE) | (1ULL<<SW_CTRL) | (1ULL<<VCC_IO) | (1ULL<<DIR_OUTPUT0) | (1ULL<<DIR_OUTPUT2)  | (1ULL<<DIR_OUTPUT1) | (1ULL<<DIR_OUTPUT3))
+#define GPIO_OUTPUT_PIN_SEL ((1ULL<<SW_CTRL)/* | (1ULL<<VCC_IO)*/)
 
 #define MOTOR_SPEED_COEFICIENT    71608    // 71608 = 1RPS VACTUAL 0x22= 2*23 uSTEPS/t
 
@@ -70,6 +60,7 @@ volatile int pcnt3_count = 0;
 #define ENCODER_L_LIM_VAL        -1000
 
 // globální proměnné pro pokusy s grafickým rozhraním
+volatile int driver_stdby;
 volatile int motor_speed0;
 volatile int motor_speed1;
 volatile int motor_speed2;
@@ -82,10 +73,10 @@ int axis0_max;
 int axis1_max;
 int axis2_max;
 int axis3_max;
-int count0=0;
-int count1=0;
-int count2=0;
-int count3=0;
+uint16_t count0=0;
+uint16_t count1=0;
+uint16_t count2=0;
+uint16_t count3=0;
 uint32_t mscurrent0;
 uint32_t drvstatus0;
 uint32_t pwmconf0;
@@ -101,7 +92,7 @@ volatile int potenciometr = 0;
 volatile int i_run = 8;
 volatile int i_hold = 0;
 volatile bool start_stop = true;
-volatile bool x = false;
+volatile bool loop = false;
 volatile uint mot_load[2048];
 volatile uint mot_pos[2048];
 volatile int count=0;

@@ -25,22 +25,22 @@ extern "C" {
 // ------------------------------------------------------------
 
 bool            flag_fan1          = true;                                                                                                                                            
-volatile int frequency_fan1     = 0;
+volatile uint16_t frequency_fan1     = 0;
 uint16_t result_fan1 = 0;
 
 bool            flag_fan2          = true;                                                                                                                                         
-volatile int frequency_fan2     = 0;
+volatile uint16_t frequency_fan2     = 0;
 uint16_t result_fan2 = 0;
 
 bool            flag_fan3          = true;                                                                                                                                              
-volatile int frequency_fan3     = 0;
+volatile uint16_t frequency_fan3     = 0;
 uint16_t result_fan3 = 0;
 
 bool            flag_fan4          = true;                                                                                                                                             
-volatile int frequency_fan4    = 0;
+volatile uint16_t frequency_fan4    = 0;
 uint16_t result_fan4 = 0;
 
-volatile double average_fans = 0;
+//volatile double average_fans = 0;
 
 // ------------------------------------------------------------
 
@@ -69,7 +69,7 @@ pcnt_config_t pcnt_config_fan1 = {
   .hctrl_mode        = PCNT_MODE_KEEP,
   .pos_mode          = PCNT_COUNT_INC,
   .neg_mode          = PCNT_COUNT_DIS,
-  .counter_h_lim     = 25,
+  .counter_h_lim     = 1000,
   .counter_l_lim     = 0,
   .unit              = PCNT_UNIT_0, 
   .channel           = PCNT_CHANNEL_0
@@ -83,7 +83,7 @@ pcnt_config_t pcnt_config_fan1 = {
   .hctrl_mode        = PCNT_MODE_KEEP,
   .pos_mode          = PCNT_COUNT_INC,
   .neg_mode          = PCNT_COUNT_DIS,
-  .counter_h_lim     = 25,
+  .counter_h_lim     = 1000,
   .counter_l_lim     = 0,
   .unit              = PCNT_UNIT_1, 
   .channel           = PCNT_CHANNEL_0
@@ -97,7 +97,7 @@ pcnt_config_t pcnt_config_fan1 = {
   .hctrl_mode        = PCNT_MODE_KEEP,
   .pos_mode          = PCNT_COUNT_INC,
   .neg_mode          = PCNT_COUNT_DIS,
-  .counter_h_lim     = 25,
+  .counter_h_lim     = 1000,
   .counter_l_lim     = 0,
   .unit              = PCNT_UNIT_2, 
   .channel           = PCNT_CHANNEL_0
@@ -111,7 +111,7 @@ pcnt_config_t pcnt_config_fan1 = {
   .hctrl_mode        = PCNT_MODE_KEEP,
   .pos_mode          = PCNT_COUNT_INC,
   .neg_mode          = PCNT_COUNT_DIS,
-  .counter_h_lim     = 25,
+  .counter_h_lim     = 1000,
   .counter_l_lim     = 0,
   .unit              = PCNT_UNIT_3, 
   .channel           = PCNT_CHANNEL_0
@@ -270,7 +270,7 @@ void pcnt_init_fan4(void)
 void pulse(void*pvParameters){
    while(1){ 
 
-    if (flag_fan1 == true && gpio_get_level(DIR_OUTPUT0)==1)
+    if (flag_fan1 == true)
   {
     flag_fan1 = false;
     frequency_fan1 =  result_fan1 /*+ (overflow_cnt_fan1*20000)*/; 
@@ -281,7 +281,7 @@ void pulse(void*pvParameters){
     pcnt_counter_clear(PCNT_UNIT_0);
   }
 
-   else if(flag_fan1 == true && gpio_get_level(DIR_OUTPUT0)==0){
+   /*else if(flag_fan1 == true && gpio_get_level(DIR_OUTPUT0)==0){
     flag_fan1 = false;
     frequency_fan1 =  result_fan1; 
     pcnt_counter_clear(PCNT_UNIT_0); 
@@ -290,9 +290,9 @@ void pulse(void*pvParameters){
     count0=count0-frequency_fan1;
     esp_timer_start_once(timer_handle_fan1, 1000000);
     pcnt_counter_clear(PCNT_UNIT_0);
-   }
+   }*/
 
-  if (flag_fan2 == true && gpio_get_level(DIR_OUTPUT1)==1)
+  if (flag_fan2 == true)
   {
     flag_fan2 = false;
     frequency_fan2 =  result_fan2 /*+ (overflow_cnt_fan2 * 20000)*/; 
@@ -302,7 +302,7 @@ void pulse(void*pvParameters){
     esp_timer_start_once(timer_handle_fan2, 1000000);
     pcnt_counter_clear(PCNT_UNIT_1);
   }
-   else if(flag_fan2 == true && gpio_get_level(DIR_OUTPUT1)==0){flag_fan2 = false;
+   /*else if(flag_fan2 == true && gpio_get_level(DIR_OUTPUT1)==0){flag_fan2 = false;
     frequency_fan2 =  result_fan2; 
     pcnt_counter_clear(PCNT_UNIT_1); 
     pcnt_counter_resume(PCNT_UNIT_1);     
@@ -311,9 +311,9 @@ void pulse(void*pvParameters){
     esp_timer_start_once(timer_handle_fan2, 1000000);
     pcnt_counter_clear(PCNT_UNIT_1);
     
-   }
+   }*/
 
-  if (flag_fan3 == true && gpio_get_level(DIR_OUTPUT2)==1)
+  if (flag_fan3 == true)
   {
     flag_fan3 = false;
     frequency_fan3 =  result_fan3 /*+ (overflow_cnt_fan3 * 20000)*/; 
@@ -323,7 +323,7 @@ void pulse(void*pvParameters){
     esp_timer_start_once(timer_handle_fan3, 1000000);
     pcnt_counter_clear(PCNT_UNIT_2);
   }
-   else if(flag_fan3 == true && gpio_get_level(DIR_OUTPUT2)==0){
+   /*else if(flag_fan3 == true && gpio_get_level(DIR_OUTPUT2)==0){
     flag_fan3 = false;
     frequency_fan3 =  result_fan3; 
     pcnt_counter_clear(PCNT_UNIT_2); 
@@ -332,10 +332,10 @@ void pulse(void*pvParameters){
     count2=count2-frequency_fan3;
     esp_timer_start_once(timer_handle_fan3, 1000000);
     pcnt_counter_clear(PCNT_UNIT_2);
-   }
+   }*/
     
 
-  if (flag_fan4 == true && gpio_get_level(DIR_OUTPUT3)==1)
+  if (flag_fan4 == true)
   {
     flag_fan4 = false;
     frequency_fan4 =  result_fan4 /*+ (overflow_cnt_fan4 * 20000)*/; 
@@ -345,7 +345,7 @@ void pulse(void*pvParameters){
     esp_timer_start_once(timer_handle_fan4, 1000000);
     pcnt_counter_clear(PCNT_UNIT_3);
   }
-else if(flag_fan4 == true && gpio_get_level(DIR_OUTPUT3)==0){
+/*else if(flag_fan4 == true && gpio_get_level(DIR_OUTPUT3)==0){
     flag_fan4 = false;
     frequency_fan4 =  result_fan4; 
     pcnt_counter_clear(PCNT_UNIT_3); 
@@ -354,7 +354,7 @@ else if(flag_fan4 == true && gpio_get_level(DIR_OUTPUT3)==0){
     count3=count3-frequency_fan4;
     esp_timer_start_once(timer_handle_fan4, 1000000);
     pcnt_counter_clear(PCNT_UNIT_3);
-}
+}*/
    }
 }
 

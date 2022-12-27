@@ -18,7 +18,7 @@ public:
 
     bool init() {
         gpio_config_t en_pin_conf {
-            .pin_bit_mask = 1UL<<uint64_t(c_enable_pin),
+            .pin_bit_mask = 1ULL<<uint64_t(c_enable_pin),
             .mode = GPIO_MODE_OUTPUT,
             .pull_up_en = GPIO_PULLUP_DISABLE,
             .pull_down_en = GPIO_PULLDOWN_DISABLE,
