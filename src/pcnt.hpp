@@ -277,7 +277,7 @@ void pulse(void*pvParameters){
     pcnt_counter_clear(PCNT_UNIT_0); 
     pcnt_counter_resume(PCNT_UNIT_0); 
     count0=frequency_fan1+count0;
-    esp_timer_start_once(timer_handle_fan1, 1000000);
+    esp_timer_start_once(timer_handle_fan1, 1000);
     pcnt_counter_clear(PCNT_UNIT_0);
   }
 
@@ -299,7 +299,7 @@ void pulse(void*pvParameters){
     pcnt_counter_clear(PCNT_UNIT_1); 
     pcnt_counter_resume(PCNT_UNIT_1); 
    count1=frequency_fan2+count1;
-    esp_timer_start_once(timer_handle_fan2, 1000000);
+    esp_timer_start_once(timer_handle_fan2, 1000);
     pcnt_counter_clear(PCNT_UNIT_1);
   }
    /*else if(flag_fan2 == true && gpio_get_level(DIR_OUTPUT1)==0){flag_fan2 = false;
@@ -320,7 +320,7 @@ void pulse(void*pvParameters){
     pcnt_counter_clear(PCNT_UNIT_2); 
     pcnt_counter_resume(PCNT_UNIT_2); 
     count2=frequency_fan3+count2;
-    esp_timer_start_once(timer_handle_fan3, 1000000);
+    esp_timer_start_once(timer_handle_fan3, 1000);
     pcnt_counter_clear(PCNT_UNIT_2);
   }
    /*else if(flag_fan3 == true && gpio_get_level(DIR_OUTPUT2)==0){
@@ -342,7 +342,7 @@ void pulse(void*pvParameters){
     pcnt_counter_clear(PCNT_UNIT_3); 
     pcnt_counter_resume(PCNT_UNIT_3); 
     count3=frequency_fan4+count3;
-    esp_timer_start_once(timer_handle_fan4, 1000000);
+    esp_timer_start_once(timer_handle_fan4, 1000);
     pcnt_counter_clear(PCNT_UNIT_3);
   }
 /*else if(flag_fan4 == true && gpio_get_level(DIR_OUTPUT3)==0){

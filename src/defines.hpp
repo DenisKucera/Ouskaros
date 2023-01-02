@@ -7,7 +7,7 @@
 
 //#define VCC_IO                      GPIO_NUM_14
 
-#define SW_CTRL                   GPIO_NUM_32  // L = transistor Q3 off -> motor power off, H = all drivers on
+#define VCC_IO                   GPIO_NUM_32  // L = transistor Q3 off -> motor power off, H = all drivers on
 
 #define ENN_PIN0                   GPIO_NUM_33
 #define ENN_PIN1                   GPIO_NUM_25
@@ -52,7 +52,7 @@ volatile int pcnt3_count = 0;
 #define DRIVERS_RX_TIMEOUT        (20 / portTICK_RATE_MS)
 #define DRIVERS_UART_START_BYTE   0x05
 
-#define GPIO_OUTPUT_PIN_SEL ((1ULL<<SW_CTRL)/* | (1ULL<<VCC_IO)*/)
+#define GPIO_OUTPUT_PIN_SEL ((1ULL<<VCC_IO))
 
 #define MOTOR_SPEED_COEFICIENT    71608    // 71608 = 1RPS VACTUAL 0x22= 2*23 uSTEPS/t
 
@@ -60,7 +60,7 @@ volatile int pcnt3_count = 0;
 #define ENCODER_L_LIM_VAL        -1000
 
 // globální proměnné pro pokusy s grafickým rozhraním
-volatile int driver_stdby;
+volatile int driver_stdby=0;
 volatile int motor_speed0;
 volatile int motor_speed1;
 volatile int motor_speed2;
@@ -103,12 +103,12 @@ volatile bool motor1_cal=false;
 volatile bool motor2_cal=false;
 volatile bool motor3_cal=false;
 
-/*volatile bool motor0_cal_done=true;
-volatile bool motor1_cal_done=true;
-volatile bool motor2_cal_done=true;
-volatile bool motor3_cal_done=true;*/
+volatile bool motor0_cal_done=false;
+volatile bool motor1_cal_done=false;
+volatile bool motor2_cal_done=false;
+volatile bool motor3_cal_done=false;
 
-volatile uint16_t driver0_const=149; //139,149
-volatile uint16_t driver1_const=568; //558,568
-volatile int driver2_const=1003; //1003,993
-volatile uint16_t driver3_const=962; //955,962
+volatile int driver0_const=75; //139,149
+volatile int driver1_const=275; //558,568
+volatile int driver2_const=500; //1003,993
+volatile int driver3_const=450; //955,962
