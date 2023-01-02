@@ -319,7 +319,6 @@ extern "C" void app_main(void)
             motor1_cal=true;
         }*/
         //
-        bool motor2_cal_done=1;
         if(gpio_get_level(KONCOVY_DOJEZD_2)==0 && (position2==0)){
             driver2.set_speed(speed);
             vTaskDelay(5/portTICK_PERIOD_MS);
@@ -337,11 +336,11 @@ extern "C" void app_main(void)
             position2=count2;
             count2=0;
         }
-        else if(motor2_cal && (count2>=position2) && (position2!=driver2_const) && motor2_cal_done){
+        else if(motor2_cal && (count2>=position2) && (position2!=driver2_const)){
             driver2.set_speed(0);
             vTaskDelay(5/portTICK_PERIOD_MS);
             printf("Motor2 zkalibrovan na pozici: %d\n",position2);
-            motor2_cal_done=0;
+            motor2_cal=false;
         }
         //
         /*if(!gpio_get_level(KONCOVY_DOJEZD_3)){

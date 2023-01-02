@@ -103,6 +103,11 @@ volatile bool motor1_cal=false;
 volatile bool motor2_cal=false;
 volatile bool motor3_cal=false;
 
+/*volatile bool motor0_cal_done=true;
+volatile bool motor1_cal_done=true;
+volatile bool motor2_cal_done=true;
+volatile bool motor3_cal_done=true;*/
+
 volatile uint16_t driver0_const=149; //139,149
 volatile uint16_t driver1_const=568; //558,568
 volatile int driver2_const=1003; //1003,993
