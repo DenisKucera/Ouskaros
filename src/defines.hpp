@@ -34,9 +34,9 @@
 #define LEDC_OUTPUT_IO3      GPIO_NUM_14  //inicializace STEP pinu
 #define DIR_OUTPUT3         GPIO_NUM_19  //inicializace DIR pinu*/
 #define PCNT_INPUT_0        GPIO_NUM_12 //BOOT FAILS IF PULLED HIGH!!!
-#define PCNT_INPUT_1        GPIO_NUM_13
+#define PCNT_INPUT_1        GPIO_NUM_18
 #define PCNT_INPUT_2        GPIO_NUM_15
-#define PCNT_INPUT_3        GPIO_NUM_18
+#define PCNT_INPUT_3        GPIO_NUM_13
 //#define PCNT_H_LIM_VAL      1
 volatile int pcnt0_count = 0;
 volatile int pcnt1_count = 0;
@@ -82,10 +82,6 @@ uint32_t drvstatus0;
 uint32_t pwmconf0;
 uint32_t gconf0;
 uint32_t sgresult0;
-uint32_t position0=0;
-uint32_t position1=0;
-uint32_t position2=0;
-uint32_t position3=0;
 //volatile int motor_load = 0;
 //volatile int motor_stop_sensitivity = 100;
 //volatile int potenciometr = 0;
@@ -97,12 +93,17 @@ uint32_t position3=0;
 //volatile uint mot_pos[2048];
 //volatile int count=0;
 
-volatile int position0=0;
-volatile int position1=0;
-volatile int position2=0;
-volatile int position3=0;
+volatile uint16_t position0=0;
+volatile uint16_t position1=0;
+volatile uint16_t position2=0;
+volatile uint16_t position3=0;
 
-volatile bool motor0_cal;
-volatile bool motor1_cal;
-volatile bool motor2_cal;
-volatile bool motor3_cal;
+volatile bool motor0_cal=false;
+volatile bool motor1_cal=false;
+volatile bool motor2_cal=false;
+volatile bool motor3_cal=false;
+
+volatile uint16_t driver0_const=149; //139,149
+volatile uint16_t driver1_const=568; //558,568
+volatile int driver2_const=1003; //1003,993
+volatile uint16_t driver3_const=962; //955,962

@@ -182,8 +182,8 @@ void pcnt_init_fan1(void)
 
   pcnt_unit_config(&pcnt_config_fan1);
   pcnt_isr_register(pcnt_event_handler_fan1, NULL, 0, NULL);                   
-  //pcnt_set_filter_value(PCNT_UNIT_0, 1000);
-  //pcnt_filter_enable(PCNT_UNIT_0); 
+  pcnt_set_filter_value(PCNT_UNIT_0, 1000);
+  pcnt_filter_enable(PCNT_UNIT_0); 
   pcnt_counter_pause(PCNT_UNIT_0);                                       
   pcnt_counter_clear(PCNT_UNIT_0);                                       
   pcnt_event_enable(PCNT_UNIT_0, PCNT_EVT_H_LIM);                        
@@ -193,7 +193,7 @@ void pcnt_init_fan1(void)
   timer_args_fan1.arg      = NULL;
   timer_args_fan1.name     = "one shot timer";
 
- /* if(esp_timer_create(&timer_args_fan1, &timer_handle_fan1) != ESP_OK) 
+  /*if(esp_timer_create(&timer_args_fan1, &timer_handle_fan1) != ESP_OK) 
   {
     ESP_LOGE(TAG,"timer create");
   }*/
@@ -208,8 +208,8 @@ void pcnt_init_fan2(void)
   pcnt_unit_config(&pcnt_config_fan2);
   pcnt_isr_register(pcnt_event_handler_fan2, NULL, 0, NULL);               
   pcnt_intr_enable(PCNT_UNIT_1);  
-  //pcnt_set_filter_value(PCNT_UNIT_1, 1000);
-  //pcnt_filter_enable(PCNT_UNIT_1); 
+  pcnt_set_filter_value(PCNT_UNIT_1, 1000);
+  pcnt_filter_enable(PCNT_UNIT_1); 
   pcnt_counter_pause(PCNT_UNIT_1);                                      
   pcnt_counter_clear(PCNT_UNIT_1);                                      
   pcnt_event_enable(PCNT_UNIT_1, PCNT_EVT_H_LIM);                        
@@ -229,8 +229,8 @@ void pcnt_init_fan3(void)
   pcnt_unit_config(&pcnt_config_fan3);
   pcnt_isr_register(pcnt_event_handler_fan3, NULL, 0, NULL);
   pcnt_intr_enable(PCNT_UNIT_2);  
-  //pcnt_set_filter_value(PCNT_UNIT_2, 1000);
-  //pcnt_filter_enable(PCNT_UNIT_2); 
+  pcnt_set_filter_value(PCNT_UNIT_2, 1000);
+  pcnt_filter_enable(PCNT_UNIT_2); 
   pcnt_counter_pause(PCNT_UNIT_2);                                       
   pcnt_counter_clear(PCNT_UNIT_2);                                        
   pcnt_event_enable(PCNT_UNIT_2, PCNT_EVT_H_LIM);                        
@@ -250,8 +250,8 @@ void pcnt_init_fan4(void)
   pcnt_unit_config(&pcnt_config_fan4);
   pcnt_isr_register(pcnt_event_handler_fan4, NULL, 0, NULL);
   pcnt_intr_enable(PCNT_UNIT_3);  
- //pcnt_set_filter_value(PCNT_UNIT_3, 1000);
- //pcnt_filter_enable(PCNT_UNIT_3); 
+  pcnt_set_filter_value(PCNT_UNIT_3, 1000);
+  pcnt_filter_enable(PCNT_UNIT_3); 
   pcnt_counter_pause(PCNT_UNIT_3);                                       
   pcnt_counter_clear(PCNT_UNIT_3);                                        
   pcnt_event_enable(PCNT_UNIT_3, PCNT_EVT_H_LIM);                        
@@ -357,7 +357,7 @@ void pulse(void*pvParameters){
 }*/
    }
 }
-
+/*
 void step_pulse_init(const uint32_t freq_hz, const ledc_timer_t timer_num, const gpio_num_t ledc_output, const ledc_channel_t channel)
 {
     // Prepare and then apply the LEDC PWM timer configuration
@@ -382,5 +382,5 @@ void step_pulse_init(const uint32_t freq_hz, const ledc_timer_t timer_num, const
         .hpoint     = 0,
     };    
     ledc_channel_config(&ledc_channel);
-}
+}*/
 }
