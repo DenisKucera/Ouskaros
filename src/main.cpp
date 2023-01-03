@@ -437,10 +437,6 @@ extern "C" void app_main(void)
        // driver0.set_speed(driver_cal_speed());
     }
 
-
-
-
-
         //pulse();
        /* printf("pocet pulzu: %d\n",pcnt0_count);
         vTaskDelay(1000/portTICK_PERIOD_MS);*/
