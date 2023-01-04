@@ -1,4 +1,11 @@
 #pragma once
+#include <stdio.h>
+#include "esp_spiffs.h"
+#include "esp_log.h"
+#include <iostream>
+
+#define TAG "spiffs"
+using namespace std;
 
 void iopins_init(void)
 {
@@ -11,50 +18,39 @@ void iopins_init(void)
     gpio_config(&io_conf);
 }
 
-/*void encoder_init(const pcnt_unit_t unit, const gpio_num_t pinA, const gpio_num_t pinB)
+
+void spiffs(void)
 {
-    pcnt_config_t pcnt_config_0 = {
-        .pulse_gpio_num = pinA,
-        .ctrl_gpio_num = pinB,
-        .lctrl_mode = PCNT_MODE_KEEP,
-        .hctrl_mode = PCNT_MODE_REVERSE,
-        .pos_mode = PCNT_COUNT_INC,
-        .neg_mode = PCNT_COUNT_DEC,
-        .counter_h_lim = ENCODER_H_LIM_VAL,
-        .counter_l_lim = ENCODER_L_LIM_VAL,
-        .unit = unit,
-        .channel = PCNT_CHANNEL_0,
+    esp_vfs_spiffs_conf_t config = {
+        .base_path = "/spiffs",
+        .partition_label = NULL,
+        .max_files = 5,
+        .format_if_mount_failed = true,
     };
-    pcnt_config_t pcnt_config_1 = {
-        .pulse_gpio_num = pinB,
-        .ctrl_gpio_num = pinA,
-        .lctrl_mode = PCNT_MODE_REVERSE,
-        .hctrl_mode = PCNT_MODE_KEEP,
-        .pos_mode = PCNT_COUNT_INC,
-        .neg_mode = PCNT_COUNT_DEC,
-        .counter_h_lim = ENCODER_H_LIM_VAL,
-        .counter_l_lim = ENCODER_L_LIM_VAL,
-        .unit = unit,
-        .channel = PCNT_CHANNEL_1,
-    };
+    esp_vfs_spiffs_register(&config);
     
-    // Initialize PCNT unit 
-    
-    pcnt_unit_config(&pcnt_config_0);
-    pcnt_unit_config(&pcnt_config_1);
-
-    // Configure and enable the input filter 
-    pcnt_set_filter_value(unit, 100);
-    pcnt_filter_enable(unit);
-
-    // Initialize PCNT's counter 
-    pcnt_counter_pause(unit);
-    pcnt_counter_clear(unit);
-
-    // Everything is set up, now go to counting 
-    pcnt_counter_resume(unit);
-    
-}*/
+    /* read data from hello.txt file */
+    ESP_LOGE(TAG, "Reading data from file: instruction.txt");
+    FILE *file = fopen("/spiffs/instruction.txt", "r");
+    if (file == NULL)
+    {
+        ESP_LOGE(TAG, "File does not exist!");
+    }
+    else
+    {
+        int i=1;
+        char line[256];
+        char x[10];
+        while (fgets(line, sizeof(line), file) != NULL)
+        {
+            x[i]=line[i];
+            printf("%c\n",x[i]);
+            i++;
+        }
+        fclose(file);
+    }
+    esp_vfs_spiffs_unregister(NULL);
+}
 
 void nvs_init()
 {

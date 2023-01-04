@@ -29,8 +29,10 @@
 #include "driver/periph_ctrl.h"
 #include "pcnt.hpp"
 #include "soc/rtc_wdt.h"
+#include <iostream>
 
 using namespace rb;
+using namespace std;
 
 static void initGridUi() {
     using namespace gridui;
@@ -268,9 +270,24 @@ extern "C" void app_main(void)
     pcnt_init_fan4(); 
 
     TaskHandle_t  pulse_count;
-    xTaskCreatePinnedToCore(pulse,"pulse counter",4096,NULL,tskIDLE_PRIORITY,&pulse_count,1); 
+    xTaskCreatePinnedToCore(pulse,"pulse counter",4096,NULL,tskIDLE_PRIORITY,&pulse_count,1);
     
-    while(1){
+    /*int* p;
+    p = spiffs();
+    int i;
+    for(i=0; i<10; i++){
+        cout<<p[i]<<"\t";
+    }*/
+    
+   spiffs();
+   
+    
+    
+
+    
+    //printf("%s\n",spiffs(line)); 
+    
+    /*while(1){
         if(gpio_get_level(SILOVKA) && driver_stdby){
             driver_stdby=0;
             printf("Připojeno 12V:\n");
@@ -280,15 +297,6 @@ extern "C" void app_main(void)
             printf("Stand by:\n");
             esp_restart();
         }
-        
-        /*printf("KONCOVY_DOJEZD_0 %d\n", gpio_get_level(KONCOVY_DOJEZD_0));
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        printf("KONCOVY_DOJEZD_1 %d\n", gpio_get_level(KONCOVY_DOJEZD_1));
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        printf("KONCOVY_DOJEZD_2 %d\n", gpio_get_level(KONCOVY_DOJEZD_2));
-        vTaskDelay(5/portTICK_PERIOD_MS);
-        printf("KONCOVY_DOJEZD_3 %d\n", gpio_get_level(KONCOVY_DOJEZD_3));*/
-        
        
         int speed=-100000;
 
@@ -431,11 +439,7 @@ extern "C" void app_main(void)
        }
        vTaskDelay(10/portTICK_PERIOD_MS);
     }    
-    while(1){
-        //function();
-
-       // driver0.set_speed(driver_cal_speed());
-    }
+    */
 
         //pulse();
        /* printf("pocet pulzu: %d\n",pcnt0_count);
@@ -447,6 +451,12 @@ extern "C" void app_main(void)
         
 }
 
-
+/*printf("KONCOVY_DOJEZD_0 %d\n", gpio_get_level(KONCOVY_DOJEZD_0));
+vTaskDelay(5/portTICK_PERIOD_MS);
+        printf("KONCOVY_DOJEZD_1 %d\n", gpio_get_level(KONCOVY_DOJEZD_1));
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        printf("KONCOVY_DOJEZD_2 %d\n", gpio_get_level(KONCOVY_DOJEZD_2));
+        vTaskDelay(5/portTICK_PERIOD_MS);
+        printf("KONCOVY_DOJEZD_3 %d\n", gpio_get_level(KONCOVY_DOJEZD_3));*/
     
     
