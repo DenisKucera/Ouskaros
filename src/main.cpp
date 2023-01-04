@@ -279,7 +279,12 @@ extern "C" void app_main(void)
         cout<<p[i]<<"\t";
     }*/
     
-   spiffs();
+   int *val;
+   
+   val = spiffs();
+    for (int i = 0; i < 256; i++){
+        printf("%d\n", val[i]);
+    }
    
     
     

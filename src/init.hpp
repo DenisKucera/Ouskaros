@@ -18,8 +18,7 @@ void iopins_init(void)
     gpio_config(&io_conf);
 }
 
-
-void spiffs(void)
+int *spiffs(void)
 {
     esp_vfs_spiffs_conf_t config = {
         .base_path = "/spiffs",
@@ -38,18 +37,19 @@ void spiffs(void)
     }
     else
     {
-        int i=1;
+        int i=0;
         char line[256];
-        char x[10];
+        static int x[256];
         while (fgets(line, sizeof(line), file) != NULL)
         {
-            x[i]=line[i];
-            printf("%c\n",x[i]);
+            x[i] = int(strtol(line, NULL, 10));
             i++;
         }
         fclose(file);
+        return x;
     }
     esp_vfs_spiffs_unregister(NULL);
+    return 0;
 }
 
 void nvs_init()
