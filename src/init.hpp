@@ -37,14 +37,19 @@ int *spiffs(void)
     }
     else
     {
+        int q=0;
         int i=0;
         char line[256];
         static int x[256];
         while (fgets(line, sizeof(line), file) != NULL)
         {
             x[i] = int(strtol(line, NULL, 10));
+            if(q<i){
+                q=i;
+            }
             i++;
         }
+        x[q+1]=q+1;
         fclose(file);
         return x;
     }

@@ -272,17 +272,14 @@ extern "C" void app_main(void)
     TaskHandle_t  pulse_count;
     xTaskCreatePinnedToCore(pulse,"pulse counter",4096,NULL,tskIDLE_PRIORITY,&pulse_count,1);
     
-    /*int* p;
-    p = spiffs();
-    int i;
-    for(i=0; i<10; i++){
-        cout<<p[i]<<"\t";
-    }*/
     
    int *val;
-   
+
    val = spiffs();
     for (int i = 0; i < 256; i++){
+        if(val[i]==0){
+            break;
+        }
         printf("%d\n", val[i]);
     }
    
