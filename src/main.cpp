@@ -272,24 +272,7 @@ extern "C" void app_main(void)
     TaskHandle_t  pulse_count;
     xTaskCreatePinnedToCore(pulse,"pulse counter",4096,NULL,tskIDLE_PRIORITY,&pulse_count,1);
     
-    
-   int *val;
-
-   val = spiffs();
-    for (int i = 0; i < 256; i++){
-        if(val[i]==0){
-            break;
-        }
-        printf("%d\n", val[i]);
-    }
-   
-    
-    
-
-    
-    //printf("%s\n",spiffs(line)); 
-    
-    /*while(1){
+    while(1){
         if(gpio_get_level(SILOVKA) && driver_stdby){
             driver_stdby=0;
             printf("Připojeno 12V:\n");
@@ -441,14 +424,96 @@ extern "C" void app_main(void)
        }
        vTaskDelay(10/portTICK_PERIOD_MS);
     }    
-    */
+    
 
-        //pulse();
-       /* printf("pocet pulzu: %d\n",pcnt0_count);
-        vTaskDelay(1000/portTICK_PERIOD_MS);*/
-        //
-      //  vTaskDelay(5/portTICK_PERIOD_MS);
-       // printf("procesor: %d\n", xPortGetCoreID());
+    int *val;
+   val = spiffs();
+    for (int i = 0; i <= q; i++){
+        if(val[i]==0 && set_motors_done){
+            read_pos0 = val[i-1];
+            read_pos1 = val[i-2];
+            read_pos2 = val[i-3];
+            read_pos3 = val[i-4];
+            set_motors_done=false; 
+        }
+        while(set_motors_done!=1){ 
+        //motor0 čelisti
+        if(KONCOVY_DOJEZD_0 && !loop){
+            driver0.set_speed();
+            loop++;
+        }
+        if(count0%75==0){
+            driver0.set_speed();
+        }   
+        if(motor1_done && motor2_done && motor3_done && position0 == read_pos0 && read_pos0<0){
+            driver0.set_speed(speed);
+            motor0_done=true;
+            count0=0;
+        }
+        else if(motor1_done && motor2_done && motor3_done && -count0 != read_pos0 && read_pos0>0 && ){
+            driver0.set_speed(-speed);
+            motor0_done=true;
+            count0=0;
+        }
+        else{
+           driver0.set_speed(0);
+        }
+        //motor1
+        if(count0 && read_pos0<0){
+            driver0.set_speed(speed);
+            motor0_done=true;
+            count0=0;
+        }
+        else if(count0 && read_pos0>0){
+            driver0.set_speed(-speed);
+            motor0_done=true;
+            count0=0;
+        }
+        else{
+           driver0.set_speed(0);
+           count0=0; 
+        }
+        //motor2
+        if(count0 && read_pos0<0){
+            driver0.set_speed(speed);
+            motor0_done=true;
+            count0=0;
+        }
+        else if(count0 && read_pos0>0){
+            driver0.set_speed(-speed);
+            motor0_done=true;
+            count0=0;
+        }
+        else{
+           driver0.set_speed(0);
+           count0=0; 
+        }
+        //motor3
+        if(count0 && read_pos0<0){
+            driver0.set_speed(speed);
+            motor0_done=true;
+            count0=0;
+        }
+        else if(count0 && read_pos0>0){
+            driver0.set_speed(-speed);
+            motor0_done=true;
+            count0=0;
+        }
+        else{
+           driver0.set_speed(0);
+           count0=0; 
+        }
+        //ukončeni smyčky
+        if(motor0_done && motor1_done && motor2_done && motor3_done){
+            set_motors_done=true;
+            break;
+        }
+        }
+        /*if(val[i]==0){
+            break;
+        }*/
+        printf("%d\n", val[i]);
+    }
        
         
 }

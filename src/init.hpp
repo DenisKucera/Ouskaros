@@ -3,6 +3,7 @@
 #include "esp_spiffs.h"
 #include "esp_log.h"
 #include <iostream>
+#include "defines.hpp"
 
 #define TAG "spiffs"
 using namespace std;
@@ -18,7 +19,7 @@ void iopins_init(void)
     gpio_config(&io_conf);
 }
 
-int *spiffs(void)
+int * spiffs(void)
 {
     esp_vfs_spiffs_conf_t config = {
         .base_path = "/spiffs",
@@ -37,7 +38,6 @@ int *spiffs(void)
     }
     else
     {
-        int q=0;
         int i=0;
         char line[256];
         static int x[256];

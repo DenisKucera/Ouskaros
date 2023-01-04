@@ -60,6 +60,7 @@ volatile int pcnt3_count = 0;
 #define ENCODER_L_LIM_VAL        -1000
 
 // globální proměnné pro pokusy s grafickým rozhraním
+volatile int q=0;
 volatile int driver_stdby=0;
 volatile int motor_speed0;
 volatile int motor_speed1;
@@ -92,6 +93,7 @@ uint32_t sgresult0;
 //volatile uint mot_load[2048];
 //volatile uint mot_pos[2048];
 //volatile int count=0;
+volatile int loop=0;
 
 volatile uint16_t position0=0;
 volatile uint16_t position1=0;
@@ -112,3 +114,15 @@ volatile int driver0_const=75; //139,149
 volatile int driver1_const=275; //558,568
 volatile int driver2_const=500; //1003,993
 volatile int driver3_const=450; //955,962
+
+volatile bool motor0_done=false;
+volatile bool motor1_done=false;
+volatile bool motor2_done=false;
+volatile bool motor3_done=false;
+
+volatile bool set_motors_done=true;
+
+volatile int read_pos0=0;
+volatile int read_pos1=0;
+volatile int read_pos2=0;
+volatile int read_pos3=0;
