@@ -161,46 +161,41 @@ static void initGridUi() {
     vTaskDelay(50 / portTICK_PERIOD_MS);
 
     driver.set_speed(0);                      // otáčení motoru se nastavuje zápisem rychlosti do driveru přes Uart
-    driver.set_IHOLD_IRUN (16, 32);             // proud IHOLD (při stání) =8/32, IRUN (při běhu)= 8/32 (8/32 je minimum, 16/32 je maximum pro dluhodobější provoz)
-    driver.enable();                          //zapnutí mptoru
+    driver.set_IHOLD_IRUN (16, 32);             // proud IHOLD (při stání) =8/32, IRUN (při běhu)= 8/32 (8/32 je minimum, 16/32 je maximum pro dluhodobější provoz) 
+    if(gpio_get_level(SILOVKA)){
+        driver.enable();
+        printf("\n");
+        printf("Zapnuti driveru!\n");
+        printf("\n");
+    }
+    else{
+        driver.disable();
+        driver_stdby++;
+        printf("\n");
+        printf("Napajeni nepripojeno!\n");
+        printf("\n");
+    };                  
     vTaskDelay(300 / portTICK_PERIOD_MS);     //doba stání pro nastavení automatiky driveru
     driver.set_IHOLD_IRUN (iRun, iHold);             //proud IHOLD =0, IRUN = 8/32 (při stání je motor volně otočný)
    }
-   /*void driver_sel(const int driver_address){
-    
+   void silovka(){
+        if(gpio_get_level(SILOVKA) && driver_stdby){
+            driver_stdby=0;
+            printf("Připojeno 12V:\n");
+            esp_restart();
+        }
+        else if(gpio_get_level(SILOVKA)==0 && driver_stdby==0){
+            printf("Stand by:\n");
+            esp_restart();
+        }
    }
-   int driver_cal_speed(){
-    int speed=17902;
-    return speed;
-   }*/
 
 extern "C" void app_main(void)
 {   
     // zapnuti siloveho napajeni do driveru*/
-
-    if(gpio_get_level(SILOVKA)){
-        gpio_set_level(VCC_IO, 1);
-        gpio_set_level(ENN_PIN0, 0);
-        gpio_set_level(ENN_PIN1, 0);
-        gpio_set_level(ENN_PIN2, 0);
-        gpio_set_level(ENN_PIN3, 0);
-        printf("\n");
-        printf("Zapnuti driveru!\n");
-        printf("Oskar95 start \n\tbuild %s %s\n", __DATE__, __TIME__);
-        printf("\n");
-    }
-    else{
-        gpio_set_level(ENN_PIN0, 1);
-        gpio_set_level(ENN_PIN1, 1);
-        gpio_set_level(ENN_PIN2, 1);
-        gpio_set_level(ENN_PIN3, 1);
-        driver_stdby++;
-        printf("\n");
-        printf("Napajeni nepripojeno!\n");
-        printf("Oskar95 start \n\tbuild %s %s\n", __DATE__, __TIME__);
-        printf("\n");
-    };
+    gpio_set_level(VCC_IO, 1);
     
+    printf("Oskar95 start \n\tbuild %s %s\n", __DATE__, __TIME__);
     check_reset();
     iopins_init();
     //optozávory inicializace + tlačítka
@@ -249,18 +244,18 @@ extern "C" void app_main(void)
 
     printf("\n");
     Driver driver0 { drivers_uart, DRIVER_0_ADDRES, ENN_PIN0};
-    initDriver(driver0, 16, 32);
+    initDriver(driver0, 16, 31);
     printf("\n");
     Driver driver1 { drivers_uart, DRIVER_1_ADDRES, ENN_PIN1};
-    initDriver(driver1, 16, 32); 
+    initDriver(driver1, 16, 31); 
     driver1.set_speed(motor_speed1);
     printf("\n");
     Driver driver2 { drivers_uart, DRIVER_2_ADDRES, ENN_PIN2};
-    initDriver(driver2, 16, 32);
+    initDriver(driver2, 16, 31);
     driver2.set_speed(motor_speed2);
     printf("\n");
     Driver driver3 { drivers_uart, DRIVER_3_ADDRES, ENN_PIN3};
-    initDriver(driver3, 16, 32);
+    initDriver(driver3, 16, 31);
     driver3.set_speed(motor_speed3);
     printf("\n");
 	
@@ -272,18 +267,10 @@ extern "C" void app_main(void)
     TaskHandle_t  pulse_count;
     xTaskCreatePinnedToCore(pulse,"pulse counter",4096,NULL,tskIDLE_PRIORITY,&pulse_count,1);
     
+    int speed=-17902;//100000
+
     while(1){
-        if(gpio_get_level(SILOVKA) && driver_stdby){
-            driver_stdby=0;
-            printf("Připojeno 12V:\n");
-            esp_restart();
-        }
-        else if(gpio_get_level(SILOVKA)==0 && driver_stdby==0){
-            printf("Stand by:\n");
-            esp_restart();
-        }
-       
-        int speed=-100000;
+        silovka();
 
         if(!gpio_get_level(KONCOVY_DOJEZD_0) && position0==0){
             driver0.set_speed(speed);
@@ -381,6 +368,7 @@ extern "C" void app_main(void)
         }
         vTaskDelay(10/portTICK_PERIOD_MS);
     }
+    /*
     while(1){
         bool done0=false;
         bool done1=false;
@@ -423,97 +411,114 @@ extern "C" void app_main(void)
         break;
        }
        vTaskDelay(10/portTICK_PERIOD_MS);
-    }    
+    }*/    
     
 
-    int *val;
+    /*int *val;
    val = spiffs();
     for (int i = 0; i <= q; i++){
         if(val[i]==0 && set_motors_done){
-            read_pos0 = val[i-1];
-            read_pos1 = val[i-2];
-            read_pos2 = val[i-3];
-            read_pos3 = val[i-4];
+            read_pos3 = val[i-1];
+            read_pos2 = val[i-2];
+            read_pos1 = val[i-3];
+            read_pos0 = val[i-4];
+            position0=read_pos0+position0;
+            position1=read_pos1+position1;
+            position2=read_pos2+position2;
+            position3=read_pos3+position3;
             set_motors_done=false; 
         }
         while(set_motors_done!=1){ 
         //motor0 čelisti
-        if(KONCOVY_DOJEZD_0 && !loop){
-            driver0.set_speed();
-            loop++;
-        }
-        if(count0%75==0){
-            driver0.set_speed();
-        }   
-        if(motor1_done && motor2_done && motor3_done && position0 == read_pos0 && read_pos0<0){
-            driver0.set_speed(speed);
-            motor0_done=true;
-            count0=0;
-        }
-        else if(motor1_done && motor2_done && motor3_done && -count0 != read_pos0 && read_pos0>0 && ){
+        if(read_pos0>0 && gpio_get_level(KONCOVY_DOJEZD_0)!=1 && position0<=driver0_const && count0!=abs(read_pos0)){
             driver0.set_speed(-speed);
+            printf("%d\n",position0);
+            //printf("Nastavení pozice motoru0\n");
+        }
+        if(read_pos0<0 && gpio_get_level(KONCOVY_DOJEZD_0)!=1 && position0<=driver0_const && count0!=abs(read_pos0)){
+            driver0.set_speed(speed);
+            printf("%d\n",position0);
+            //printf("Nastavení pozice motoru0\n");
+        } 
+        else if(position0>driver0_const || gpio_get_level(KONCOVY_DOJEZD_0)){
+            driver0.set_speed(0);
+            printf("ERROR (uživatel překročil rozsah motoru0\n");
             motor0_done=true;
             count0=0;
         }
         else{
-           driver0.set_speed(0);
+            driver0.set_speed(0);
+            count0=0;
+            motor0_done=true;
         }
         //motor1
-        if(count0 && read_pos0<0){
-            driver0.set_speed(speed);
-            motor0_done=true;
-            count0=0;
+        if(read_pos1>0 && gpio_get_level(KONCOVY_DOJEZD_1)!=1 && position1<=driver1_const && count1!=abs(read_pos1)){
+            driver1.set_speed(-speed);
+            //printf("Nastavení pozice motoru1\n");
         }
-        else if(count0 && read_pos0>0){
-            driver0.set_speed(-speed);
-            motor0_done=true;
-            count0=0;
-        }
+        if(read_pos1<0 && gpio_get_level(KONCOVY_DOJEZD_1)!=1 && position1<=driver1_const && count1!=abs(read_pos1)){
+            driver1.set_speed(speed);
+            //printf("Nastavení pozice motoru1\n");
+        } 
+        else if(position1>driver1_const || gpio_get_level(KONCOVY_DOJEZD_1)){
+            driver1.set_speed(0);
+            printf("ERROR (uživatel překročil rozsah motoru1\n");
+            motor1_done=true;
+            count1=0;
+        }  
         else{
-           driver0.set_speed(0);
-           count0=0; 
+            driver1.set_speed(0);
+            count1=0;
+            motor1_done=true;
         }
         //motor2
-        if(count0 && read_pos0<0){
-            driver0.set_speed(speed);
-            motor0_done=true;
-            count0=0;
+        if(read_pos2>0 && gpio_get_level(KONCOVY_DOJEZD_2)!=1 && position2<=driver2_const && count2!=abs(read_pos2)){
+            driver2.set_speed(-speed);
+            //printf("Nastavena pozice motoru2\n");
         }
-        else if(count0 && read_pos0>0){
-            driver0.set_speed(-speed);
-            motor0_done=true;
-            count0=0;
-        }
+        if(read_pos2<0 && gpio_get_level(KONCOVY_DOJEZD_2)!=1 && position2<=driver2_const && count2!=abs(read_pos2)){
+            driver2.set_speed(speed);
+            
+        } 
+        else if(position2>driver2_const || gpio_get_level(KONCOVY_DOJEZD_2)){
+            driver2.set_speed(0);
+            printf("ERROR (uživatel překročil rozsah motoru2\n");
+            motor2_done=true;
+            count2=0;
+        }  
         else{
-           driver0.set_speed(0);
-           count0=0; 
+            driver2.set_speed(0);
+            count2=0;
+            motor2_done=true;
         }
         //motor3
-        if(count0 && read_pos0<0){
-            driver0.set_speed(speed);
-            motor0_done=true;
-            count0=0;
-        }
-        else if(count0 && read_pos0>0){
+        if(read_pos3>0 && gpio_get_level(KONCOVY_DOJEZD_3)!=1 && position3<=driver3_const && count3!=abs(read_pos3)){
             driver0.set_speed(-speed);
-            motor0_done=true;
-            count0=0;
+        }
+        if(read_pos3<0 && gpio_get_level(KONCOVY_DOJEZD_3)!=1 && position3<=driver3_const && count3!=abs(read_pos3)){
+            driver3.set_speed(speed);
+        } 
+        else if(position3>driver3_const || gpio_get_level(KONCOVY_DOJEZD_3)){
+            driver3.set_speed(0);
+            printf("ERROR (uživatel překročil rozsah motoru3\n");
+            motor3_done=true;
+            count3=0;
         }
         else{
-           driver0.set_speed(0);
-           count0=0; 
+            driver3.set_speed(0);
+            count3=0;
+            motor3_done=true;
         }
         //ukončeni smyčky
         if(motor0_done && motor1_done && motor2_done && motor3_done){
             set_motors_done=true;
             break;
         }
+        vTaskDelay(10/portTICK_PERIOD_MS);
         }
-        /*if(val[i]==0){
-            break;
-        }*/
         printf("%d\n", val[i]);
-    }
+        vTaskDelay(10/portTICK_PERIOD_MS);
+    }*/
        
         
 }

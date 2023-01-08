@@ -21,29 +21,22 @@
 #define KONCOVY_DOJEZD_2          GPIO_NUM_39
 #define KONCOVY_DOJEZD_3          GPIO_NUM_36
 
-/*#define SWITCH_0        GPIO_NUM_25
-#define SWITCH_1        GPIO_NUM_22*/
+#define DIAG_PIN0                 GPIO_NUM_19
+#define DIAG_PIN1                 GPIO_NUM_21
+#define DIAG_PIN2                 GPIO_NUM_22
+#define DIAG_PIN3                 GPIO_NUM_23
 
-
-/*#define LEDC_OUTPUT_IO0     GPIO_NUM_5  //inicializace STEP pinu
-#define DIR_OUTPUT0         GPIO_NUM_4  //inicializace DIR pinu
-#define LEDC_OUTPUT_IO1      GPIO_NUM_26  //inicializace STEP pinu
-#define DIR_OUTPUT1         GPIO_NUM_21  //inicializace DIR pinu
-#define LEDC_OUTPUT_IO2      GPIO_NUM_27  //inicializace STEP pinu
-#define DIR_OUTPUT2         GPIO_NUM_2  //inicializace DIR pinu  //MUST BE LOW OR UNCONNECTED!!!
-#define LEDC_OUTPUT_IO3      GPIO_NUM_14  //inicializace STEP pinu
-#define DIR_OUTPUT3         GPIO_NUM_19  //inicializace DIR pinu*/
 #define PCNT_INPUT_0        GPIO_NUM_12 //BOOT FAILS IF PULLED HIGH!!!
 #define PCNT_INPUT_1        GPIO_NUM_18
 #define PCNT_INPUT_2        GPIO_NUM_15
 #define PCNT_INPUT_3        GPIO_NUM_13
-//#define PCNT_H_LIM_VAL      1
+
 volatile int pcnt0_count = 0;
 volatile int pcnt1_count = 0;
 volatile int pcnt2_count = 0;
 volatile int pcnt3_count = 0;
 
-#define GPIO_BIT_MASK_INPUTS ((1ULL<<KONCOVY_DOJEZD_0) | (1ULL<<KONCOVY_DOJEZD_1) | (1ULL<<KONCOVY_DOJEZD_2) | (1ULL<<KONCOVY_DOJEZD_3) | (1ULL<<SILOVKA)/*| (1ULL<<SWITCH_0) | (1ULL<<SWITCH_1)*/)
+#define GPIO_BIT_MASK_INPUTS ((1ULL<<KONCOVY_DOJEZD_0) | (1ULL<<KONCOVY_DOJEZD_1) | (1ULL<<KONCOVY_DOJEZD_2) | (1ULL<<KONCOVY_DOJEZD_3) | (1ULL<<SILOVKA) | (1ULL<<DIAG_PIN0) | (1ULL<<DIAG_PIN1) | (1ULL<<DIAG_PIN2) | (1ULL<<DIAG_PIN3))
 
 #define DRIVERS_UART              UART_NUM_1
 #define DRIVERS_UART_TXD          GPIO_NUM_17 
@@ -83,16 +76,6 @@ uint32_t drvstatus0;
 uint32_t pwmconf0;
 uint32_t gconf0;
 uint32_t sgresult0;
-//volatile int motor_load = 0;
-//volatile int motor_stop_sensitivity = 100;
-//volatile int potenciometr = 0;
-//volatile int i_run = 8;
-//volatile int i_hold = 0;
-//volatile bool start_stop = true;
-//volatile bool loop = false;
-//volatile uint mot_load[2048];
-//volatile uint mot_pos[2048];
-//volatile int count=0;
 volatile int loop=0;
 
 volatile uint16_t position0=0;

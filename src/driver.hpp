@@ -25,7 +25,7 @@ public:
             .intr_type = GPIO_INTR_DISABLE
         };
         gpio_config(&en_pin_conf);
-        disable();
+        //disable();
         data_t data = 0;
         int result = _read(0, data);
        // printf("registr 0x00 pred zapisem  %d %X\n", result, data);
@@ -43,6 +43,9 @@ public:
     void enable(bool v = true) {
         gpio_set_level(c_enable_pin, !v);
     }
+    /*void disable(bool v = false) {
+        gpio_set_level(c_enable_pin, !v);
+    }*/
 
     void disable() { enable(false); }
 
