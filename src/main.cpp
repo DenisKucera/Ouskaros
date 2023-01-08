@@ -269,8 +269,10 @@ extern "C" void app_main(void)
     
     int speed=-17902;//100000
 
+    silovka();
+
     while(1){
-        silovka();
+        //silovka();
 
         if(!gpio_get_level(KONCOVY_DOJEZD_0) && position0==0){
             driver0.set_speed(speed);
@@ -414,7 +416,7 @@ extern "C" void app_main(void)
     }*/    
     
 
-    /*int *val;
+    int *val;
    val = spiffs();
     for (int i = 0; i <= q; i++){
         if(val[i]==0 && set_motors_done){
@@ -430,12 +432,12 @@ extern "C" void app_main(void)
         }
         while(set_motors_done!=1){ 
         //motor0 čelisti
-        if(read_pos0>0 && gpio_get_level(KONCOVY_DOJEZD_0)!=1 && position0<=driver0_const && count0!=abs(read_pos0)){
+        if(read_pos0>0 && gpio_get_level(KONCOVY_DOJEZD_0)!=1 && position0<=driver0_const && count0!=abs(read_pos0) && motor1_done && motor2_done && motor3_done){
             driver0.set_speed(-speed);
             printf("%d\n",position0);
             //printf("Nastavení pozice motoru0\n");
         }
-        if(read_pos0<0 && gpio_get_level(KONCOVY_DOJEZD_0)!=1 && position0<=driver0_const && count0!=abs(read_pos0)){
+        if(read_pos0<0 && gpio_get_level(KONCOVY_DOJEZD_0)!=1 && position0<=driver0_const && count0!=abs(read_pos0) && motor1_done && motor2_done && motor3_done){
             driver0.set_speed(speed);
             printf("%d\n",position0);
             //printf("Nastavení pozice motoru0\n");
@@ -452,11 +454,11 @@ extern "C" void app_main(void)
             motor0_done=true;
         }
         //motor1
-        if(read_pos1>0 && gpio_get_level(KONCOVY_DOJEZD_1)!=1 && position1<=driver1_const && count1!=abs(read_pos1)){
+        if(read_pos1>0 && gpio_get_level(KONCOVY_DOJEZD_1)!=1 && position1<=driver1_const && count1!=abs(read_pos1) && motor2_done && motor3_done){
             driver1.set_speed(-speed);
             //printf("Nastavení pozice motoru1\n");
         }
-        if(read_pos1<0 && gpio_get_level(KONCOVY_DOJEZD_1)!=1 && position1<=driver1_const && count1!=abs(read_pos1)){
+        if(read_pos1<0 && gpio_get_level(KONCOVY_DOJEZD_1)!=1 && position1<=driver1_const && count1!=abs(read_pos1) && motor2_done && motor3_done){
             driver1.set_speed(speed);
             //printf("Nastavení pozice motoru1\n");
         } 
@@ -490,12 +492,13 @@ extern "C" void app_main(void)
             driver2.set_speed(0);
             count2=0;
             motor2_done=true;
+            printf("xxxxxxxxxxx\n");
         }
         //motor3
-        if(read_pos3>0 && gpio_get_level(KONCOVY_DOJEZD_3)!=1 && position3<=driver3_const && count3!=abs(read_pos3)){
+        if(read_pos3>0 && gpio_get_level(KONCOVY_DOJEZD_3)!=1 && position3<=driver3_const && count3!=abs(read_pos3) && motor2_done){
             driver0.set_speed(-speed);
         }
-        if(read_pos3<0 && gpio_get_level(KONCOVY_DOJEZD_3)!=1 && position3<=driver3_const && count3!=abs(read_pos3)){
+        if(read_pos3<0 && gpio_get_level(KONCOVY_DOJEZD_3)!=1 && position3<=driver3_const && count3!=abs(read_pos3) && motor2_done){
             driver3.set_speed(speed);
         } 
         else if(position3>driver3_const || gpio_get_level(KONCOVY_DOJEZD_3)){
@@ -518,7 +521,7 @@ extern "C" void app_main(void)
         }
         printf("%d\n", val[i]);
         vTaskDelay(10/portTICK_PERIOD_MS);
-    }*/
+    }
        
         
 }
