@@ -178,7 +178,7 @@ static void initGridUi() {
     vTaskDelay(300 / portTICK_PERIOD_MS);     //doba stání pro nastavení automatiky driveru
     driver.set_IHOLD_IRUN (iRun, iHold);             //proud IHOLD =0, IRUN = 8/32 (při stání je motor volně otočný)
    }
-   void silovka(){
+   void silovka(void){
         if(gpio_get_level(SILOVKA) && driver_stdby){
             driver_stdby=0;
             printf("Připojeno 12V:\n");
@@ -244,18 +244,18 @@ extern "C" void app_main(void)
 
     printf("\n");
     Driver driver0 { drivers_uart, DRIVER_0_ADDRES, ENN_PIN0};
-    initDriver(driver0, 16, 31);
+    initDriver(driver0, 16, 16);
     printf("\n");
     Driver driver1 { drivers_uart, DRIVER_1_ADDRES, ENN_PIN1};
-    initDriver(driver1, 16, 31); 
+    initDriver(driver1, 16, 16); 
     driver1.set_speed(motor_speed1);
     printf("\n");
     Driver driver2 { drivers_uart, DRIVER_2_ADDRES, ENN_PIN2};
-    initDriver(driver2, 16, 31);
+    initDriver(driver2, 16, 16);
     driver2.set_speed(motor_speed2);
     printf("\n");
     Driver driver3 { drivers_uart, DRIVER_3_ADDRES, ENN_PIN3};
-    initDriver(driver3, 16, 31);
+    initDriver(driver3, 16, 16);
     driver3.set_speed(motor_speed3);
     printf("\n");
 	
