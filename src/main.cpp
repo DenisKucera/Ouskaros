@@ -272,7 +272,8 @@ extern "C" void app_main(void)
     silovka();
 
     while(1){
-        //silovka();
+        silovka();
+        vTaskDelay(10/portTICK_PERIOD_MS);
 
         if(!gpio_get_level(KONCOVY_DOJEZD_0) && position0==0){
             driver0.set_speed(speed);
