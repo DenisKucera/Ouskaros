@@ -164,13 +164,13 @@ static void initGridUi() {
     driver.set_IHOLD_IRUN (16, 32);             // proud IHOLD (při stání) =8/32, IRUN (při běhu)= 8/32 (8/32 je minimum, 16/32 je maximum pro dluhodobější provoz) 
     if(gpio_get_level(SILOVKA)){
         driver.enable();
+        //driver_stdby = 1;
         printf("\n");
         printf("Zapnuti driveru!\n");
         printf("\n");
     }
     else{
         driver.disable();
-        driver_stdby++;
         printf("\n");
         printf("Napajeni nepripojeno!\n");
         printf("\n");
@@ -179,28 +179,40 @@ static void initGridUi() {
     driver.set_IHOLD_IRUN (iRun, iHold);             //proud IHOLD =0, IRUN = 8/32 (při stání je motor volně otočný)
    }
    void silovka(void){
-        if(gpio_get_level(SILOVKA) && driver_stdby){
-            driver_stdby=0;
-            printf("Připojeno 12V:\n");
-            esp_restart();
-        }
-        else if(gpio_get_level(SILOVKA)==0 && driver_stdby==0){
-            printf("Stand by:\n");
-            esp_restart();
+        if(gpio_get_level(SILOVKA) != driver_stdby){
+
+            if((!driver_stdby) == 1){ 
+                printf("Připojeno 12V:\n");
+                esp_restart();
+
+            }else{
+                printf("Stand by:\n");
+                esp_restart();
+            }
         }
    }
 
 extern "C" void app_main(void)
 {   
     // zapnuti siloveho napajeni do driveru*/
+    driver_stdby = gpio_get_level(SILOVKA);
     gpio_set_level(VCC_IO, 1);
     
     printf("Oskar95 start \n\tbuild %s %s\n", __DATE__, __TIME__);
     check_reset();
     iopins_init();
     //optozávory inicializace + tlačítka
+    gpio_config_t silovka_conf = {
+        .pin_bit_mask = GPIO_BIT_MASK_INPUT_OUTPUT,   //inicializuje pin silovka
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_ENABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&silovka_conf);
+
     gpio_config_t io_conf = {
-        .pin_bit_mask = GPIO_BIT_MASK_INPUTS,   //inicializuje piny 35,34,36,39,22,25
+        .pin_bit_mask = GPIO_BIT_MASK_INPUTS,   //inicializuje piny 35,34,36,39
         .mode = GPIO_MODE_INPUT,
         .pull_up_en = GPIO_PULLUP_DISABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
@@ -269,7 +281,7 @@ extern "C" void app_main(void)
     
     int speed=-17902;//100000
 
-    silovka();
+    //silovka();
 
     while(1){
         silovka();

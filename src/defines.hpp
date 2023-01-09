@@ -36,7 +36,8 @@ volatile int pcnt1_count = 0;
 volatile int pcnt2_count = 0;
 volatile int pcnt3_count = 0;
 
-#define GPIO_BIT_MASK_INPUTS ((1ULL<<KONCOVY_DOJEZD_0) | (1ULL<<KONCOVY_DOJEZD_1) | (1ULL<<KONCOVY_DOJEZD_2) | (1ULL<<KONCOVY_DOJEZD_3) | (1ULL<<SILOVKA) | (1ULL<<DIAG_PIN0) | (1ULL<<DIAG_PIN1) | (1ULL<<DIAG_PIN2) | (1ULL<<DIAG_PIN3))
+#define GPIO_BIT_MASK_INPUTS ((1ULL<<KONCOVY_DOJEZD_0) | (1ULL<<KONCOVY_DOJEZD_1) | (1ULL<<KONCOVY_DOJEZD_2) | (1ULL<<KONCOVY_DOJEZD_3)  | (1ULL<<DIAG_PIN0) | (1ULL<<DIAG_PIN1) | (1ULL<<DIAG_PIN2) | (1ULL<<DIAG_PIN3))
+#define GPIO_BIT_MASK_INPUT_OUTPUT (1ULL<<SILOVKA)
 
 #define DRIVERS_UART              UART_NUM_1
 #define DRIVERS_UART_TXD          GPIO_NUM_17 
@@ -54,7 +55,7 @@ volatile int pcnt3_count = 0;
 
 // globální proměnné pro pokusy s grafickým rozhraním
 volatile int q=0;
-volatile int driver_stdby=0;
+bool driver_stdby=0;
 volatile int motor_speed0;
 volatile int motor_speed1;
 volatile int motor_speed2;
