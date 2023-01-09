@@ -452,6 +452,7 @@ extern "C" void app_main(void)
         else{
             driver0.set_speed(0);
             count0=0;
+            printf("Motor0 nastaven\n");
             motor0_done=true;
         }
         //motor1
@@ -472,6 +473,7 @@ extern "C" void app_main(void)
         else{
             driver1.set_speed(0);
             count1=0;
+            printf("Motor1 nastaven\n");
             motor1_done=true;
         }
         //motor2
@@ -492,8 +494,8 @@ extern "C" void app_main(void)
         else{
             driver2.set_speed(0);
             count2=0;
+            printf("Motor2 nastaven\n");
             motor2_done=true;
-            printf("xxxxxxxxxxx\n");
         }
         //motor3
         if(read_pos3>0 && gpio_get_level(KONCOVY_DOJEZD_3)!=1 && position3<=driver3_const && count3!=abs(read_pos3) && motor2_done){
@@ -511,13 +513,23 @@ extern "C" void app_main(void)
         else{
             driver3.set_speed(0);
             count3=0;
+            printf("Motor3 nastaven\n");
             motor3_done=true;
         }
         //ukončeni smyčky
         if(motor0_done && motor1_done && motor2_done && motor3_done){
             set_motors_done=true;
-            break;
         }
+        /*printf("read_pos0: %d\n",read_pos0);
+        printf("read_pos1: %d\n",read_pos1);
+        printf("read_pos2: %d\n",read_pos2);
+        printf("read_pos3: %d\n",read_pos3);
+
+        printf("position0: %d\n",position0);
+        printf("position1: %d\n",position1);
+        printf("position2: %d\n",position2);
+        printf("position3: %d\n",position3);
+        set_motors_done=true;*/
         vTaskDelay(10/portTICK_PERIOD_MS);
         }
         printf("%d\n", val[i]);
