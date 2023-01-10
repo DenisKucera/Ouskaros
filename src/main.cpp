@@ -279,7 +279,7 @@ extern "C" void app_main(void)
     TaskHandle_t  pulse_count;
     xTaskCreatePinnedToCore(pulse,"pulse counter",4096,NULL,tskIDLE_PRIORITY,&pulse_count,1);
     
-    int speed=-17902;//100000
+    int speed=-100000;//100000
 
     //silovka();
 
@@ -441,95 +441,32 @@ extern "C" void app_main(void)
             position1=read_pos1+position1;
             position2=read_pos2+position2;
             position3=read_pos3+position3;
+            count0=0;
+            count1=0;
+            count2=0;
+            count3=0;
             set_motors_done=false; 
         }
         while(set_motors_done!=1){ 
         //motor0 čelisti
-        if(read_pos0>0 && gpio_get_level(KONCOVY_DOJEZD_0)!=1 && position0<=driver0_const && count0!=abs(read_pos0) && motor1_done && motor2_done && motor3_done){
-            driver0.set_speed(-speed);
-            printf("%d\n",position0);
-            //printf("Nastavení pozice motoru0\n");
-        }
-        if(read_pos0<0 && gpio_get_level(KONCOVY_DOJEZD_0)!=1 && position0<=driver0_const && count0!=abs(read_pos0) && motor1_done && motor2_done && motor3_done){
+        if((read_pos0>0) && (count0==0)){
             driver0.set_speed(speed);
-            printf("%d\n",position0);
-            //printf("Nastavení pozice motoru0\n");
-        } 
-        else if(position0>driver0_const || gpio_get_level(KONCOVY_DOJEZD_0)){
-            driver0.set_speed(0);
-            printf("ERROR (uživatel překročil rozsah motoru0\n");
-            motor0_done=true;
-            count0=0;
         }
-        else{
-            driver0.set_speed(0);
-            count0=0;
-            printf("Motor0 nastaven\n");
-            motor0_done=true;
-        }
-        //motor1
-        if(read_pos1>0 && gpio_get_level(KONCOVY_DOJEZD_1)!=1 && position1<=driver1_const && count1!=abs(read_pos1) && motor2_done && motor3_done){
-            driver1.set_speed(-speed);
-            //printf("Nastavení pozice motoru1\n");
-        }
-        if(read_pos1<0 && gpio_get_level(KONCOVY_DOJEZD_1)!=1 && position1<=driver1_const && count1!=abs(read_pos1) && motor2_done && motor3_done){
-            driver1.set_speed(speed);
-            //printf("Nastavení pozice motoru1\n");
-        } 
-        else if(position1>driver1_const || gpio_get_level(KONCOVY_DOJEZD_1)){
-            driver1.set_speed(0);
-            printf("ERROR (uživatel překročil rozsah motoru1\n");
-            motor1_done=true;
-            count1=0;
-        }  
-        else{
-            driver1.set_speed(0);
-            count1=0;
-            printf("Motor1 nastaven\n");
-            motor1_done=true;
-        }
-        //motor2
-        if(read_pos2>0 && gpio_get_level(KONCOVY_DOJEZD_2)!=1 && position2<=driver2_const && count2!=abs(read_pos2)){
-            driver2.set_speed(-speed);
-            //printf("Nastavena pozice motoru2\n");
-        }
-        if(read_pos2<0 && gpio_get_level(KONCOVY_DOJEZD_2)!=1 && position2<=driver2_const && count2!=abs(read_pos2)){
-            driver2.set_speed(speed);
-            
-        } 
-        else if(position2>driver2_const || gpio_get_level(KONCOVY_DOJEZD_2)){
-            driver2.set_speed(0);
-            printf("ERROR (uživatel překročil rozsah motoru2\n");
-            motor2_done=true;
-            count2=0;
-        }  
-        else{
-            driver2.set_speed(0);
-            count2=0;
-            printf("Motor2 nastaven\n");
-            motor2_done=true;
-        }
-        //motor3
-        if(read_pos3>0 && gpio_get_level(KONCOVY_DOJEZD_3)!=1 && position3<=driver3_const && count3!=abs(read_pos3) && motor2_done){
+        if((read_pos0<0) && (count0==0)){
             driver0.set_speed(-speed);
         }
-        if(read_pos3<0 && gpio_get_level(KONCOVY_DOJEZD_3)!=1 && position3<=driver3_const && count3!=abs(read_pos3) && motor2_done){
-            driver3.set_speed(speed);
-        } 
-        else if(position3>driver3_const || gpio_get_level(KONCOVY_DOJEZD_3)){
-            driver3.set_speed(0);
-            printf("ERROR (uživatel překročil rozsah motoru3\n");
-            motor3_done=true;
-            count3=0;
+        else if((count0>=driver0_const) || gpio_get_level(KONCOVY_DOJEZD_0) || (position0>=driver0_const)){
+            driver0.set_speed(0);
+            printf("ERROR motor0\n");
+            motor0_cal_done=true;
         }
-        else{
-            driver3.set_speed(0);
-            count3=0;
-            printf("Motor3 nastaven\n");
-            motor3_done=true;
+        else if((count0==abs(read_pos0))){
+            driver0.set_speed(0);
+            printf("SUCCES motor0 nastaven\n");
+            motor0_cal_done=true;
         }
         //ukončeni smyčky
-        if(motor0_done && motor1_done && motor2_done && motor3_done){
+        if(motor0_done /*&& motor1_done && motor2_done && motor3_done*/){
             set_motors_done=true;
         }
         /*printf("read_pos0: %d\n",read_pos0);
