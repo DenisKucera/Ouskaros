@@ -544,7 +544,7 @@ extern "C" void app_main(void)
         set_motors_done=true;*/
         vTaskDelay(10/portTICK_PERIOD_MS);
         }
-        printf("%d\n", val[i]);
+        printf("Nactena hodnota: %d\n", val[i]);
         vTaskDelay(10/portTICK_PERIOD_MS);
     }
        
