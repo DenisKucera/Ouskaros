@@ -279,7 +279,7 @@ extern "C" void app_main(void)
     TaskHandle_t  pulse_count;
     xTaskCreatePinnedToCore(pulse,"pulse counter",4096,NULL,tskIDLE_PRIORITY,&pulse_count,1);
     
-    int speed=-17902;//100000
+    int speed=-100000;//100000
 
     //silovka();
 
@@ -396,7 +396,7 @@ extern "C" void app_main(void)
         done0=true;
        }
        else{
-        driver0.set_speed(-71608);
+        driver0.set_speed(speed);
        }
        if(gpio_get_level(KONCOVY_DOJEZD_1)){
         driver1.set_speed(0);
@@ -404,7 +404,7 @@ extern "C" void app_main(void)
         done1=true;
        }
        else{
-        driver1.set_speed(71608);
+        driver1.set_speed(-speed);
        }
        if(gpio_get_level(KONCOVY_DOJEZD_2)){
         driver2.set_speed(0);
@@ -412,7 +412,7 @@ extern "C" void app_main(void)
         done2=true;
        }
        else{
-        driver2.set_speed(-71608);
+        driver2.set_speed(speed);
        }
        if(gpio_get_level(KONCOVY_DOJEZD_3)){
         driver3.set_speed(0);
@@ -420,13 +420,64 @@ extern "C" void app_main(void)
         done3=true;
        }
        else{
-        driver3.set_speed(71608);
+        driver3.set_speed(-speed);
        }
        if(done0 && done1 && done2 && done3){
+        done0=false;
+        done1=false;
+        done2=false;
+        done3=false;
+        while(1){
+        //motor0    
+            if(gpio_get_level(KONCOVY_DOJEZD_0)){
+                driver0.set_speed(-speed); //pevně daný směr od závory
+        } 
+            else if(!gpio_get_level(KONCOVY_DOJEZD_0)){
+                driver0.set_speed(0);
+                count0=0;
+                done0=true;
+        }
+        //motor1
+        if(gpio_get_level(KONCOVY_DOJEZD_1)){
+                driver1.set_speed(speed); //pevně daný směr od závory
+        } 
+            else if(!gpio_get_level(KONCOVY_DOJEZD_1)){
+                driver1.set_speed(0);
+                count1=0;
+                done1=true;
+        }
+        //motor2
+        if(gpio_get_level(KONCOVY_DOJEZD_2)){
+                driver2.set_speed(-speed); //pevně daný směr od závory
+        } 
+            else if(!gpio_get_level(KONCOVY_DOJEZD_2)){
+                driver2.set_speed(0);
+                count2=0;
+                done2=true;
+        }
+        //motor3
+        if(gpio_get_level(KONCOVY_DOJEZD_3)){
+                driver3.set_speed(speed); //pevně daný směr od závory
+        } 
+            else if(!gpio_get_level(KONCOVY_DOJEZD_3)){
+                driver3.set_speed(0);
+                count3=0;
+                done3=true;
+        }
+        if(done0 && done1 && done2 && done3){
+            done0=false;
+            done1=false;
+            done2=false;
+            done3=false;
+            break;
+        }
+        vTaskDelay(10/portTICK_PERIOD_MS);    
+        }
         break;
        }
        vTaskDelay(10/portTICK_PERIOD_MS);
-    }*/    
+    }*/   
+    
     
 
     int *val;
