@@ -281,8 +281,6 @@ extern "C" void app_main(void)
     
     int speed=-71608;//100000
 
-    
-    
     while(1){
         silovka();
 
@@ -383,41 +381,6 @@ extern "C" void app_main(void)
     printf("%d\n",gpio_get_level(KONCOVY_DOJEZD_1));
     printf("%d\n",gpio_get_level(KONCOVY_DOJEZD_2));
     printf("%d\n",gpio_get_level(KONCOVY_DOJEZD_3));
-
-    /*while(1){
-        driver0.set_speed(speed);
-        driver1.set_speed(speed);
-        driver2.set_speed(speed);
-        driver3.set_speed(speed);
-        if(count0%37==0){
-            driver0.set_speed(0);
-            count0=0;
-            motor0_done=true;
-        }
-        if(count1%137==0){
-            driver1.set_speed(0);
-            count1=0;
-            motor1_done=true;
-        }
-        if(count2%251==0){
-            driver2.set_speed(0);
-            count2=0;
-            motor2_done=true;
-        }
-        if(count3%226==0){
-            driver3.set_speed(0);
-            count3=0;
-            motor3_done=true;
-        }
-        else if(motor0_done && motor1_done && motor2_done && motor3_done){
-            motor0_done=false;
-            motor1_done=false;
-            motor2_done=false;
-            motor3_done=false;
-            break;
-        }
-        vTaskDelay(10/portTICK_PERIOD_MS);
-    }*/
 
     while(1){
         silovka();
