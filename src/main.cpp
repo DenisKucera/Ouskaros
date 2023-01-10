@@ -583,16 +583,6 @@ extern "C" void app_main(void)
             motor3_done=false;
             set_motors_done=true;
         }
-        /*printf("read_pos0: %d\n",read_pos0);
-        printf("read_pos1: %d\n",read_pos1);
-        printf("read_pos2: %d\n",read_pos2);
-        printf("read_pos3: %d\n",read_pos3);
-
-        printf("position0: %d\n",position0);
-        printf("position1: %d\n",position1);
-        printf("position2: %d\n",position2);
-        printf("position3: %d\n",position3);
-        set_motors_done=true;*/
         vTaskDelay(10/portTICK_PERIOD_MS);
         }
         printf("Nactena hodnota: %d\n", val[i]);
