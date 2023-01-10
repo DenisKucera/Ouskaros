@@ -99,14 +99,14 @@ volatile int driver1_const=275; //558,568
 volatile int driver2_const=500; //1003,993
 volatile int driver3_const=450; //955,962
 
-volatile bool motor0_done=false;
-volatile bool motor1_done=false;
-volatile bool motor2_done=false;
-volatile bool motor3_done=false;
+bool motor0_done=false;
+bool motor1_done=false;
+bool motor2_done=false;
+bool motor3_done=false;
 
-volatile bool set_motors_done=true;
+bool set_motors_done=true;
 
-volatile int read_pos0=0;
-volatile int read_pos1=0;
-volatile int read_pos2=0;
-volatile int read_pos3=0;
+int read_pos0=0;
+int read_pos1=0;
+int read_pos2=0;
+int read_pos3=0;
