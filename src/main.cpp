@@ -271,10 +271,10 @@ extern "C" void app_main(void)
     driver3.set_speed(motor_speed3);
     printf("\n");
 	
-    pcnt_init_fan1();
-    pcnt_init_fan2();
-    pcnt_init_fan3();
-    pcnt_init_fan4(); 
+    pcnt_init_counter0();
+    pcnt_init_counter1();
+    pcnt_init_counter2();
+    pcnt_init_counter3(); 
 
     TaskHandle_t  pulse_count;
     xTaskCreatePinnedToCore(pulse,"pulse counter",4096,NULL,tskIDLE_PRIORITY,&pulse_count,1);
@@ -285,7 +285,7 @@ extern "C" void app_main(void)
 
     while(1){
         silovka();
-        vTaskDelay(10/portTICK_PERIOD_MS);
+        //vTaskDelay(10/portTICK_PERIOD_MS);
 
         if(!gpio_get_level(KONCOVY_DOJEZD_0) && position0==0){
             driver0.set_speed(speed);
@@ -297,7 +297,7 @@ extern "C" void app_main(void)
             motor0_cal=true;
         }
         else if(gpio_get_level(KONCOVY_DOJEZD_0) && position0==0){
-            driver0.set_speed(speed*(-1));
+            driver0.set_speed(-speed);
             position0=count0;
             count0=0;
             //vTaskDelay(500/portTICK_PERIOD_MS);
@@ -311,10 +311,10 @@ extern "C" void app_main(void)
         }
         //
         if(!gpio_get_level(KONCOVY_DOJEZD_1) && (position1==0) && motor0_cal_done){
-            driver1.set_speed(speed*(-1));
+            driver1.set_speed(-speed);
         }
         else if(!gpio_get_level(KONCOVY_DOJEZD_1) && (count1>=driver1_const)){
-            driver1.set_speed(speed*(-1));
+            driver1.set_speed(-speed);
             position1=driver1_const-position1;
             count1=0;
             motor1_cal=true;
@@ -345,7 +345,7 @@ extern "C" void app_main(void)
             motor2_cal=true;
         }
         else if(gpio_get_level(KONCOVY_DOJEZD_2) && (position2==0) && motor0_cal_done && motor1_cal_done){
-            driver2.set_speed(speed*(-1));
+            driver2.set_speed(-speed);
             //vTaskDelay(5/portTICK_PERIOD_MS);
             position2=count2;
             count2=0;
@@ -360,10 +360,10 @@ extern "C" void app_main(void)
         }
         //
         if(!gpio_get_level(KONCOVY_DOJEZD_3) && (position3==0) && motor0_cal_done && motor1_cal_done && motor2_cal_done){
-            driver3.set_speed(speed*(-1));
+            driver3.set_speed(-speed);
         }
         else if(!gpio_get_level(KONCOVY_DOJEZD_3) && count3>=driver3_const){
-            driver3.set_speed(speed*(-1));
+            driver3.set_speed(-speed);
             position3=driver3_const-position3;
             count3=0;
             motor3_cal=true;
@@ -427,6 +427,7 @@ extern "C" void app_main(void)
         done1=false;
         done2=false;
         done3=false;
+
         while(1){
         //motor0    
             if(gpio_get_level(KONCOVY_DOJEZD_0)){
