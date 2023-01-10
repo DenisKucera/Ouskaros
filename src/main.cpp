@@ -331,48 +331,48 @@ extern "C" void app_main(void)
 
         while(1){
         //motor0    
-            if(gpio_get_level(KONCOVY_DOJEZD_0)){
+            if(!done0 && done1 && done2 && done3){
                 driver0.set_speed(-speed); //pevně daný směr od závory
-        } 
+            } 
             else if(/*!gpio_get_level(KONCOVY_DOJEZD_0)*/count0%37==0){
                 driver0.set_speed(0);
                 count0=0;
                 done0=true;
-        }
+            }
         //motor1
-        if(gpio_get_level(KONCOVY_DOJEZD_1)){
+        if(done2 && !done1){
                 driver1.set_speed(speed); //pevně daný směr od závory
-        } 
+            } 
             else if(/*!gpio_get_level(KONCOVY_DOJEZD_1)*/count1%137==0){
                 driver1.set_speed(0);
                 count1=0;
                 done1=true;
-        }
+            }
         //motor2
-        if(gpio_get_level(KONCOVY_DOJEZD_2)){
+        if(!done2){
                 driver2.set_speed(-speed); //pevně daný směr od závory
-        } 
+            } 
             else if(/*!gpio_get_level(KONCOVY_DOJEZD_2)*/count2%251==0){
                 driver2.set_speed(0);
                 count2=0;
                 done2=true;
-        }
+            }
         //motor3
-        if(gpio_get_level(KONCOVY_DOJEZD_3)){
+        if(done1 && done2 && !done3){
                 driver3.set_speed(speed); //pevně daný směr od závory
-        } 
+            } 
             else if(/*!gpio_get_level(KONCOVY_DOJEZD_3)*/count3%226==0){
                 driver3.set_speed(0);
                 count3=0;
                 done3=true;
-        }
+            }
         if(done0 && done1 && done2 && done3){
             done0=false;
             done1=false;
             done2=false;
             done3=false;
             break;
-        }
+            }
         vTaskDelay(10/portTICK_PERIOD_MS);    
         }
         break;
