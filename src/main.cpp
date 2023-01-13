@@ -284,10 +284,6 @@ extern "C" void app_main(void)
     while(1){
         silovka();
 
-        bool done0=false;
-        bool done1=false;
-        bool done2=false;
-        bool done3=false;
         //Zastaveni na koncovych dojezdech
         if(gpio_get_level(KONCOVY_DOJEZD_0)){
         driver0.set_speed(0);
@@ -326,62 +322,57 @@ extern "C" void app_main(void)
         done1=false;
         done2=false;
         done3=false;
-
-        while(1){
-        //motor0    
-            if(!done0 && done1 && done2 && done3){
-                driver0.set_speed(-speed); //pevně daný směr od závory
-            } 
-            else if(/*!gpio_get_level(KONCOVY_DOJEZD_0)*/count0%37==0){
-                driver0.set_speed(0);
-                count0=0;
-                done0=true;
-            }
-        //motor1
-        if(done2 && !done1){
-                driver1.set_speed(speed); //pevně daný směr od závory
-            } 
-            else if(/*!gpio_get_level(KONCOVY_DOJEZD_1)*/count1%137==0){
-                driver1.set_speed(0);
-                count1=0;
-                done1=true;
-            }
-        //motor2
-        if(!done2){
-                driver2.set_speed(-speed); //pevně daný směr od závory
-            } 
-            else if(/*!gpio_get_level(KONCOVY_DOJEZD_2)*/count2%251==0){
-                driver2.set_speed(0);
-                count2=0;
-                done2=true;
-            }
-        //motor3
-        if(done1 && done2 && !done3){
-                driver3.set_speed(speed); //pevně daný směr od závory
-            } 
-            else if(/*!gpio_get_level(KONCOVY_DOJEZD_3)*/count3%226==0){
-                driver3.set_speed(0);
-                count3=0;
-                done3=true;
-            }
-        if(done0 && done1 && done2 && done3){
-            done0=false;
-            done1=false;
-            done2=false;
-            done3=false;
-            break;
-            }
-        vTaskDelay(10/portTICK_PERIOD_MS);    
-        }
         break;
        }
-       vTaskDelay(10/portTICK_PERIOD_MS);
-    }   
-    printf("%d\n",gpio_get_level(KONCOVY_DOJEZD_0));
-    printf("%d\n",gpio_get_level(KONCOVY_DOJEZD_1));
-    printf("%d\n",gpio_get_level(KONCOVY_DOJEZD_2));
-    printf("%d\n",gpio_get_level(KONCOVY_DOJEZD_3));
+        vTaskDelay(5/portTICK_PERIOD_MS);
+       }
+    vTaskDelay(1000/portTICK_PERIOD_MS);
+    while(1){
+        silovka();
 
+        if(count0>=36){
+        driver0.set_speed(0);
+        count0=0;
+        done0=true;
+       }
+       else if(!done0){
+        driver0.set_speed(-speed);
+       }
+       if(count1>=129){
+        driver1.set_speed(0);
+        count1=0;
+        done1=true;
+       }
+       else if(!done1){
+        driver1.set_speed(speed);
+       }
+       if(count2>=249){
+        driver2.set_speed(0);
+        count2=0;
+        done2=true;
+       }
+       else if(!done2){
+        driver2.set_speed(-speed);
+       }
+       if(count3>=224){
+        driver3.set_speed(0);
+        count3=0;
+        done3=true;   
+       }
+       else if(!done3){
+        driver3.set_speed(speed);
+       }
+       if(done0 && done1 && done2 && done3){
+        done0=false;
+        done1=false;
+        done2=false;
+        done3=false;
+        break;
+       }
+        vTaskDelay(5/portTICK_PERIOD_MS); 
+    }  
+
+    vTaskDelay(1000/portTICK_PERIOD_MS); 
     while(1){
         silovka();
         //vTaskDelay(10/portTICK_PERIOD_MS);
@@ -389,7 +380,7 @@ extern "C" void app_main(void)
         if(!gpio_get_level(KONCOVY_DOJEZD_0) && position0==0){
             driver0.set_speed(speed);
         }
-        else if(!gpio_get_level(KONCOVY_DOJEZD_0) && count0>=driver0_const){
+        else if(!gpio_get_level(KONCOVY_DOJEZD_0) && count0==driver0_const){
             driver0.set_speed(speed);
             position0=driver0_const-position0;
             count0=0;
@@ -401,7 +392,7 @@ extern "C" void app_main(void)
             count0=0;
             //vTaskDelay(500/portTICK_PERIOD_MS);
         }
-        else if(motor0_cal && (count0>=position0) && (position0!=driver0_const)){
+        else if(motor0_cal && (count0==position0) && (position0!=driver0_const)){
             driver0.set_speed(0);
             printf("Motor0 zkalibrovan na pozici: %d\n",position0);
             motor0_cal=false;
@@ -412,7 +403,7 @@ extern "C" void app_main(void)
         if(!gpio_get_level(KONCOVY_DOJEZD_1) && (position1==0) && motor0_cal_done){
             driver1.set_speed(-speed);
         }
-        else if(!gpio_get_level(KONCOVY_DOJEZD_1) && (count1>=driver1_const)){
+        else if(!gpio_get_level(KONCOVY_DOJEZD_1) && (count1==driver1_const)){
             driver1.set_speed(-speed);
             position1=driver1_const-position1;
             count1=0;
@@ -424,7 +415,7 @@ extern "C" void app_main(void)
             count1=0;
             //vTaskDelay(500/portTICK_PERIOD_MS);
         }
-        else if(motor1_cal && (count1>=position1) && (position1!=driver1_const)){
+        else if(motor1_cal && (count1==position1) && (position1!=driver1_const)){
             driver1.set_speed(0);
             printf("Motor1 zkalibrovan na pozici: %d\n",position1);
             motor1_cal=false;
@@ -436,7 +427,7 @@ extern "C" void app_main(void)
             driver2.set_speed(speed);
             //vTaskDelay(5/portTICK_PERIOD_MS);
         }
-        else if(!gpio_get_level(KONCOVY_DOJEZD_2) && (count2>=driver2_const)){
+        else if(!gpio_get_level(KONCOVY_DOJEZD_2) && (count2==driver2_const)){
             driver2.set_speed(speed);
             //vTaskDelay(5/portTICK_PERIOD_MS);
             position2=driver2_const-position2;
@@ -449,7 +440,7 @@ extern "C" void app_main(void)
             position2=count2;
             count2=0;
         }
-        else if(motor2_cal && (count2>=position2) && (position2!=driver2_const)){
+        else if(motor2_cal && (count2==position2) && (position2!=driver2_const)){
             driver2.set_speed(0);
             //vTaskDelay(5/portTICK_PERIOD_MS);
             printf("Motor2 zkalibrovan na pozici: %d\n",position2);
@@ -461,7 +452,7 @@ extern "C" void app_main(void)
         if(!gpio_get_level(KONCOVY_DOJEZD_3) && (position3==0) && motor0_cal_done && motor1_cal_done && motor2_cal_done){
             driver3.set_speed(-speed);
         }
-        else if(!gpio_get_level(KONCOVY_DOJEZD_3) && count3>=driver3_const){
+        else if(!gpio_get_level(KONCOVY_DOJEZD_3) && count3==driver3_const){
             driver3.set_speed(-speed);
             position3=driver3_const-position3;
             count3=0;
@@ -472,7 +463,7 @@ extern "C" void app_main(void)
             position3=count3;
             count3=0;
         }
-        else if(motor3_cal && (count3>=position3) && (position3!=driver3_const)){
+        else if(motor3_cal && (count3==position3) && (position3!=driver3_const)){
             driver3.set_speed(0);
             printf("Motor3 zkalibrovan na pozici: %d\n",position3);
             motor3_cal=false;
@@ -480,9 +471,9 @@ extern "C" void app_main(void)
             count3=0;
             break;
         }
-        vTaskDelay(10/portTICK_PERIOD_MS);
+        vTaskDelay(5/portTICK_PERIOD_MS);
     }
-
+    vTaskDelay(1000/portTICK_PERIOD_MS);
     int *val;
     val = spiffs();
     for (int i = 0; i <= q; i++){
@@ -586,10 +577,10 @@ extern "C" void app_main(void)
             motor3_done=false;
             set_motors_done=true;
         }
-        vTaskDelay(10/portTICK_PERIOD_MS);
+        vTaskDelay(5/portTICK_PERIOD_MS);
         }
         printf("Nactena hodnota: %d\n", val[i]);
-        vTaskDelay(10/portTICK_PERIOD_MS);
+        vTaskDelay(5/portTICK_PERIOD_MS);
     }
        
         

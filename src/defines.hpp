@@ -94,8 +94,8 @@ volatile bool motor1_cal_done=false;
 volatile bool motor2_cal_done=false;
 volatile bool motor3_cal_done=false;
 
-volatile int driver0_const=75; //139,149
-volatile int driver1_const=275; //558,568
+volatile int driver0_const=74; //139,149
+volatile int driver1_const=250; //558,568
 volatile int driver2_const=500; //1003,993
 volatile int driver3_const=450; //955,962
 
@@ -103,6 +103,11 @@ bool motor0_done=false;
 bool motor1_done=false;
 bool motor2_done=false;
 bool motor3_done=false;
+
+bool done0=false;
+bool done1=false;
+bool done2=false;
+bool done3=false;
 
 bool set_motors_done=true;
 
