@@ -26,7 +26,7 @@
 #define DIAG_PIN2                 GPIO_NUM_22
 #define DIAG_PIN3                 GPIO_NUM_23
 
-#define PCNT_INPUT_0        GPIO_NUM_12 //BOOT FAILS IF PULLED HIGH!!!
+#define PCNT_INPUT_0        GPIO_NUM_12 
 #define PCNT_INPUT_1        GPIO_NUM_18
 #define PCNT_INPUT_2        GPIO_NUM_15
 #define PCNT_INPUT_3        GPIO_NUM_13
@@ -48,10 +48,7 @@ volatile int pcnt3_count = 0;
 
 #define GPIO_OUTPUT_PIN_SEL ((1ULL<<VCC_IO))
 
-#define MOTOR_SPEED_COEFICIENT    71608    // 71608 = 1RPS VACTUAL 0x22= 2*23 uSTEPS/t
-
-#define ENCODER_H_LIM_VAL         1000
-#define ENCODER_L_LIM_VAL        -1000
+#define MOTOR_SPEED_COEFICIENT    71608    // 71608 = 1RPS VACTUAL 0x22= 2*23
 
 // globální proměnné pro pokusy s grafickým rozhraním
 volatile int q=0;
@@ -77,7 +74,6 @@ uint32_t drvstatus0;
 uint32_t pwmconf0;
 uint32_t gconf0;
 uint32_t sgresult0;
-volatile int loop=0;
 
 volatile uint16_t position0=0;
 volatile uint16_t position1=0;
@@ -94,10 +90,13 @@ volatile bool motor1_cal_done=false;
 volatile bool motor2_cal_done=false;
 volatile bool motor3_cal_done=false;
 
-volatile int driver0_const=74; //139,149
-volatile int driver1_const=250; //558,568
-volatile int driver2_const=500; //1003,993
-volatile int driver3_const=450; //955,962
+int h_limits[4]={0,0,0,0};
+int l_limits[4]={0,0,0,0};
+
+int16_t driver0_const=10; //139,149
+int16_t driver1_const=250; //558,568
+int16_t driver2_const=500; //1003,993
+int16_t driver3_const=450; //955,962
 
 bool motor0_done=false;
 bool motor1_done=false;

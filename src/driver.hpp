@@ -10,10 +10,11 @@ public:
     typedef uint8_t driver_address_t;
     typedef uint8_t register_address_t;
 
-    Driver(Uart& uart, const driver_address_t address, const gpio_num_t enable_pin)
+    Driver(Uart& uart, const driver_address_t address, const gpio_num_t enable_pin, const pcnt_unit_t unit)
         : m_uart {uart},
           c_address {address},
-          c_enable_pin(enable_pin)
+          c_enable_pin{enable_pin},
+          c_unit(unit)
     {}
 
     bool init() {
@@ -30,9 +31,13 @@ public:
         int result = _read(0, data);
        // printf("registr 0x00 pred zapisem  %d %X\n", result, data);
         vTaskDelay(100 / portTICK_PERIOD_MS);
-        _write(0x00, 0x000000C9);
+        _write(0x00, 0xC9);//000000
         vTaskDelay(100 / portTICK_PERIOD_MS);
-        _write(0x06C, 0x00000010010053); //18010053 FULLSTEPS //10010053 default 256uSTEPS
+        _write(0x06C, 0x10010053); //18010053 FULLSTEPS //10010053 default 256uSTEPS
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        _write(0x42, 0x0);
+        //vTaskDelay(100 / portTICK_PERIOD_MS);
+       // _write(0x13, 0x0);
         vTaskDelay(100 / portTICK_PERIOD_MS);
         result = _read(0, data);
        // printf("registr 0x00 po zapisu %d %X\n", result, data);
@@ -43,9 +48,6 @@ public:
     void enable(bool v = true) {
         gpio_set_level(c_enable_pin, !v);
     }
-    /*void disable(bool v = false) {
-        gpio_set_level(c_enable_pin, !v);
-    }*/
 
     void disable() { enable(false); }
 
@@ -55,10 +57,27 @@ public:
     bool set_gconf(int index){
         return _write(0x00, index);
     }
+    
     bool set_speed(int speed) {
+        int16_t count[4]={0,0,0,0};
+        if((speed<0) & gpio_get_level(SILOVKA)){
+            pcnt_get_counter_value(c_unit, &count[c_unit]);
+            pcnt_set_mode(c_unit,PCNT_CHANNEL_0,PCNT_COUNT_DEC,PCNT_COUNT_DIS,PCNT_MODE_KEEP,PCNT_MODE_KEEP);
+            //printf("Pocet pulzu motoru%d: %d\n",c_unit,count[c_unit]);
+        }
+        else if((speed>0) & gpio_get_level(SILOVKA)){
+            pcnt_get_counter_value(c_unit, &count[c_unit]);
+            pcnt_set_mode(c_unit,PCNT_CHANNEL_0,PCNT_COUNT_INC,PCNT_COUNT_DIS,PCNT_MODE_KEEP,PCNT_MODE_KEEP);
+            //printf("Pocet pulzu motoru%d: %d\n",c_unit,count[c_unit]);
+        }
+        else{
+            pcnt_get_counter_value(c_unit, &count[c_unit]);
+            pcnt_set_mode(c_unit,PCNT_CHANNEL_0,PCNT_COUNT_DIS,PCNT_COUNT_DIS,PCNT_MODE_DISABLE,PCNT_MODE_DISABLE);
+            //printf("Pocet pulzu motoru%d: %d\n",c_unit,count[c_unit]);
+        }
         return _write(0x22, speed); //Moving the motor by UART control.
     }
-    int read_speed(uint32_t& read) {
+    int read_tstep(uint32_t& read) {
         return _read(0x12, read); //Actual measured time between two microsteps
     }
 
@@ -69,6 +88,12 @@ public:
         //printf("data pred zapisem do IHOLD_IRUN %d\n", data);
         return _write(0x10, data);
     }
+    bool set_SGTHRS(int sgthrs){
+        return _write(0x40, sgthrs);
+    }
+    bool set_TCOOLTHRS(int coolthrs){
+        return _write(0x14, coolthrs);
+    }
     
     int get_PWMCONF(uint32_t& read) { //StealthChop PWM chopper configuration
         return _read(0x70, read);
@@ -78,8 +103,10 @@ public:
         return _read(0x6F, read);  //Driver status flags and current level read
     }
  
-    int get_SG(uint32_t& read) { //Stallguard result 0-255
-        return _read(0x41, read);
+    int get_SG(uint32_t& data) { //Stallguard result 0-510
+        _read(0x41, data);
+        //data = (data >> 1) & 0b11111111;
+        return data;
     }
 
     int get_MSCNT(uint32_t& read) {
@@ -169,6 +196,7 @@ private:
     Uart& m_uart;
     const driver_address_t c_address;
     const gpio_num_t c_enable_pin;
+    const pcnt_unit_t c_unit;
 
 // static methods
     static uint8_t _calcCRC(const uint8_t* datagram, uint8_t datagramLength) {
