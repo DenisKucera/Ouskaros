@@ -1,11 +1,11 @@
 #pragma once
+using namespace std;
+#include <atomic>
 
 #define DRIVER_0_ADDRES           0
 #define DRIVER_1_ADDRES           1
 #define DRIVER_2_ADDRES           2
 #define DRIVER_3_ADDRES           3
-
-//#define VCC_IO                      GPIO_NUM_14
 
 #define VCC_IO                   GPIO_NUM_32  // L = transistor Q3 off -> motor power off, H = all drivers on
 
@@ -15,6 +15,8 @@
 #define ENN_PIN3                   GPIO_NUM_27
 
 #define SILOVKA                    GPIO_NUM_4
+
+#define BUZZER                     GPIO_NUM_14
 
 #define KONCOVY_DOJEZD_0          GPIO_NUM_35
 #define KONCOVY_DOJEZD_1          GPIO_NUM_34
@@ -31,13 +33,9 @@
 #define PCNT_INPUT_2        GPIO_NUM_15
 #define PCNT_INPUT_3        GPIO_NUM_13
 
-volatile int pcnt0_count = 0;
-volatile int pcnt1_count = 0;
-volatile int pcnt2_count = 0;
-volatile int pcnt3_count = 0;
-
-#define GPIO_BIT_MASK_INPUTS ((1ULL<<KONCOVY_DOJEZD_0) | (1ULL<<KONCOVY_DOJEZD_1) | (1ULL<<KONCOVY_DOJEZD_2) | (1ULL<<KONCOVY_DOJEZD_3)  | (1ULL<<DIAG_PIN0) | (1ULL<<DIAG_PIN1) | (1ULL<<DIAG_PIN2) | (1ULL<<DIAG_PIN3))
-#define GPIO_BIT_MASK_INPUT_OUTPUT (1ULL<<SILOVKA)
+#define GPIO_BIT_MASK_KONCOVE_DOJEZDY ((1ULL<<KONCOVY_DOJEZD_0) | (1ULL<<KONCOVY_DOJEZD_1) | (1ULL<<KONCOVY_DOJEZD_2) | (1ULL<<KONCOVY_DOJEZD_3))
+#define GPIO_BIT_MASK_DIAG_PINS ((1ULL<<DIAG_PIN0) | (1ULL<<DIAG_PIN1) | (1ULL<<DIAG_PIN2) | (1ULL<<DIAG_PIN3))
+#define GPIO_OUTPUT_PIN_SEL ((1ULL<<VCC_IO) | (1ULL<<BUZZER))
 
 #define DRIVERS_UART              UART_NUM_1
 #define DRIVERS_UART_TXD          GPIO_NUM_17 
@@ -46,49 +44,16 @@ volatile int pcnt3_count = 0;
 #define DRIVERS_RX_TIMEOUT        (20 / portTICK_RATE_MS)
 #define DRIVERS_UART_START_BYTE   0x05
 
-#define GPIO_OUTPUT_PIN_SEL ((1ULL<<VCC_IO))
-
-#define MOTOR_SPEED_COEFICIENT    71608    // 71608 = 1RPS VACTUAL 0x22= 2*23
+#define MOTOR_SPEED_COEFICIENT    71608    // 71608 = 1RPS VACTUAL 0x22
 
 // globální proměnné pro pokusy s grafickým rozhraním
 volatile int q=0;
 bool driver_stdby=0;
-volatile int motor_speed0;
-volatile int motor_speed1;
-volatile int motor_speed2;
-volatile int motor_speed3;
-volatile int hodnota0;
-volatile int hodnota1; 
-volatile int hodnota2; 
-volatile int hodnota3;
-int axis0_max;
-int axis1_max;
-int axis2_max;
-int axis3_max;
-uint16_t count0=0;
-uint16_t count1=0;
-uint16_t count2=0;
-uint16_t count3=0;
-uint32_t mscurrent0;
-uint32_t drvstatus0;
-uint32_t pwmconf0;
-uint32_t gconf0;
-uint32_t sgresult0;
 
-volatile uint16_t position0=0;
-volatile uint16_t position1=0;
-volatile uint16_t position2=0;
-volatile uint16_t position3=0;
-
-volatile bool motor0_cal=false;
-volatile bool motor1_cal=false;
-volatile bool motor2_cal=false;
-volatile bool motor3_cal=false;
-
-volatile bool motor0_cal_done=false;
-volatile bool motor1_cal_done=false;
-volatile bool motor2_cal_done=false;
-volatile bool motor3_cal_done=false;
+std::atomic<int> motor_speed[4];
+/*std::atomic<int> motor_speed1;
+std::atomic<int> motor_speed2;
+std::atomic<int> motor_speed3;*/
 
 int h_limits[4]={0,0,0,0};
 int l_limits[4]={0,0,0,0};
@@ -97,20 +62,3 @@ int16_t driver0_const=10; //139,149
 int16_t driver1_const=250; //558,568
 int16_t driver2_const=500; //1003,993
 int16_t driver3_const=450; //955,962
-
-bool motor0_done=false;
-bool motor1_done=false;
-bool motor2_done=false;
-bool motor3_done=false;
-
-bool done0=false;
-bool done1=false;
-bool done2=false;
-bool done3=false;
-
-bool set_motors_done=true;
-
-int read_pos0=0;
-int read_pos1=0;
-int read_pos2=0;
-int read_pos3=0;

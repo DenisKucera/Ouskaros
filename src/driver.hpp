@@ -57,7 +57,7 @@ public:
     bool set_gconf(int index){
         return _write(0x00, index);
     }
-    
+
     bool set_speed(int speed) {
         int16_t count[4]={0,0,0,0};
         if((speed<0) & gpio_get_level(SILOVKA)){

@@ -14,6 +14,9 @@
 #include "driver/pcnt.h"
 #include "esp_attr.h"
 #include "soc/gpio_sig_map.h"
+#include <atomic>
+
+using namespace std;
 
 void silovka(void*pvParameters){
     while(1){
@@ -43,22 +46,22 @@ void gpio_control_task(void* arg){
     uint32_t io_num;
     while(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)){
         switch(io_num){
-            case 19: case 34:{
-            printf("motor0!!!\n");
+            case 19:
+            motor_speed[3] = 0;
+            printf("motor3 stalled!!!\n");
             break;
-            }
-            case 21: case 35:{
-            printf("motor1!!!\n");
+            case 21:
+            motor_speed[2] = 0;    
+            printf("motor2 stalled!!!\n");
             break;
-            }
-            case 22: case 36:{
-            printf("motor2!!!\n");
+            case 22:
+            motor_speed[1] = 0;    
+            printf("motor1 stalled!!!\n");
             break;
-            }
-            case 23: case 39:{
-            printf("motor3!!!\n");
+            case 23:
+            motor_speed[0] = 0;    
+            printf("motor0 stalled!!!\n");
             break;
-            }
         }
     }
 }
@@ -105,6 +108,30 @@ esp_reset_reason_t check_reset() {
         break;
     }
     return resetReason;
+}
+void step_pulse_init(const uint32_t freq_hz, const ledc_timer_t timer_num, const gpio_num_t ledc_output, const ledc_channel_t channel)
+{
+    // Prepare and then apply the LEDC PWM timer configuration
+    periph_module_enable(PERIPH_LEDC_MODULE);
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode       = LEDC_HIGH_SPEED_MODE,
+        .duty_resolution  = LEDC_TIMER_8_BIT,
+        .timer_num        = timer_num,
+        .freq_hz          = freq_hz,  // set output frequency at 10000 Hz
+        .clk_cfg = LEDC_AUTO_CLK,
+    };
+    ledc_timer_config(&ledc_timer);
+    // Prepare and then apply the LEDC PWM channel configuration
+    ledc_channel_config_t ledc_channel = {
+        .gpio_num   = ledc_output,
+        .speed_mode = LEDC_HIGH_SPEED_MODE,
+        .channel    = channel,
+        .intr_type  = LEDC_INTR_FADE_END,
+        .timer_sel  = timer_num,
+        .duty       = 128, // set duty at about 50%
+        .hpoint     = 0,
+    };    
+    ledc_channel_config(&ledc_channel);
 }
 
 class MutexGuard {
