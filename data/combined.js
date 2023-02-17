@@ -9,17 +9,21 @@ ge1doot.canvas = function (elem) {
     return false
   }
   canvas.ctx = canvas.elem.getContext('2d')
+  canvas.dpr = window.devicePixelRatio || 1;
   canvas.setSize = function () {
     var o = this.elem
-    var w = this.elem.offsetWidth * 1
-    var h = this.elem.offsetHeight * 1
+    var w = this.elem.offsetWidth
+    var h = this.elem.offsetHeight
     if (w != this.width || h != this.height) {
       for (this.left = 0, this.top = 0; o != null; o = o.offsetParent) {
         this.left += o.offsetLeft
         this.top += o.offsetTop
       }
-      this.width = this.elem.width = w
-      this.height = this.elem.height = h
+      this.elem.width = w*this.dpr
+      this.elem.height = h*this.dpr
+      this.width = w
+      this.height = h
+      canvas.ctx.scale(this.dpr, this.dpr)
       this.resize && this.resize()
     }
   }
@@ -44,6 +48,11 @@ ge1doot.canvas = function (elem) {
   var started = false,
     endX = 0,
     endY = 0
+
+  if (window['IN_RB_GRID_DESIGNER'] === true) {
+    return canvas
+  }
+
   var addEvent = function (elem, e, fn) {
     for (var i = 0, events = e.split(','); i < events.length; i++) {
       elem.addEventListener(events[i], fn.bind(canvas.pointer), false)
@@ -332,6 +341,9 @@ Manager.prototype.onMessage = function (event) {
     case '_gst':
       if (this.grid) this.grid.onMessageState(data)
       break
+    case '_gtb':
+      if (this.grid) this.grid.setCurrentTab(data['tab'])
+      break
   }
 }
 
@@ -398,6 +410,7 @@ function Prop(type, getFunc, setFunc) {
   this.ignoreInBuilder = false
   this.options = null
   this.isColor = false
+  this.step = undefined
 }
 
 Prop.prototype.disableEdit = function () {
@@ -420,6 +433,11 @@ Prop.prototype.setIsColor = function () {
   return this
 }
 
+Prop.prototype.setStep = function (step) {
+  this.step = step
+  return this
+}
+
 function Position(x, y, w, h) {
   this.x = x
   this.y = y
@@ -432,12 +450,11 @@ Position.prototype.equals = function (o) {
 }
 
 function Widget(grid, uuid, element) {
-  this.MIN_LIBRARY_VERSION = 0x040000
-
   this.x = 0
   this.y = 0
   this.w = 2
   this.h = 2
+  this.tab = 0
 
   this.grid = grid
   this.uuid = uuid
@@ -451,12 +468,15 @@ function Widget(grid, uuid, element) {
 
 Widget.SUBCLASSES = []
 
+Widget.prototype.MIN_LIBRARY_VERSION = 0x040000
+
 Widget.prototype.PROPERTIES = {
   id: new Prop(String).setIgnoreInBuilder(),
   x: new Prop(Number).setIgnoreInBuilder(),
   y: new Prop(Number).setIgnoreInBuilder(),
   w: new Prop(Number).setIgnoreInBuilder(),
   h: new Prop(Number).setIgnoreInBuilder(),
+  tab: new Prop(Number).setIgnoreInBuilder(),
   css: new Prop(
     Object,
     function () {
@@ -1361,7 +1381,11 @@ Bar.prototype.draw = function () {
 
 function Button(grid, uuid) {
   var el = document.createElement('button')
-  el.innerText = 'Button'
+  el.style.display = 'flex'
+
+  this.span = document.createElement('span')
+  el.appendChild(this.span)
+  this.span.innerText = 'Button'
 
   Widget.call(this, grid, uuid, el)
 
@@ -1369,6 +1393,15 @@ function Button(grid, uuid) {
   this.h = 1
 
   this.pressed = false
+
+  this.el.style.justifyContent = this.align = 'center'
+  this.el.style.alignItems = this.valign = 'center'
+
+  this.fontSize = 12
+  this.span.style.fontSize = this.fontSize + 'pt'
+
+  this.color = '#000000'
+  this.background = ''
 
   if (!('ontouchstart' in document.documentElement)) {
     el.addEventListener(
@@ -1393,7 +1426,7 @@ function Button(grid, uuid) {
       function (ev) {
         if (this.pressed) return
         this.pressed = true
-        this.sendEvent('press')
+        this.sendEvent('press', { pressed: true })
       }.bind(this)
     )
     this.el.addEventListener(
@@ -1401,7 +1434,7 @@ function Button(grid, uuid) {
       function (ev) {
         if (!this.pressed) return
         this.pressed = false
-        this.sendEvent('release')
+        this.sendEvent('release', { pressed: false })
       }.bind(this)
     )
   }
@@ -1411,13 +1444,183 @@ Widget.createSubclass(Button, {
   text: new Prop(
     String,
     function () {
-      return this.el.innerText
+      return this.span.innerText
     },
     function (val) {
-      this.el.innerText = val
+      this.span.innerText = val
+    }
+  ),
+  fontSize: new Prop(Number, undefined, function (val) {
+    this.fontSize = val
+    this.span.style.fontSize = val + 'pt'
+  }),
+  color: new Prop(String, undefined, function (val) {
+    this.color = val
+    this.el.style.color = val
+  }).setIsColor(),
+  background: new Prop(String, undefined, function (val) {
+    this.background = val
+    this.el.style.backgroundColor = val
+  }).setIsColor(),
+  align: new Prop(String, undefined, function (val) {
+    this.align = val
+    this.el.style.justifyContent = val
+  }).setOptions(['flex-start', 'center', 'flex-end']),
+  valign: new Prop(String, undefined, function (val) {
+    this.valign = val
+    this.el.style.alignItems = val
+  }).setOptions(['flex-start', 'center', 'flex-end']),
+  disabled: new Prop(
+    Boolean,
+    function () {
+      return this.el.disabled
+    },
+    function (val) {
+      this.el.disabled = !!val
     }
   )
 })
+
+function Camera(grid, uuid) {
+  var el = document.createElement('canvas')
+  Widget.call(this, grid, uuid, Widget.wrapCanvas(el))
+
+  this.w = 4
+  this.h = 4
+  this.rotation = 90
+  this.clip = false
+  this.frame = null
+  this.badStatus = false
+
+  this.canvas = ge1doot.canvas(el)
+  this.canvas.resize = this.draw.bind(this)
+
+  if(window['IN_RB_GRID_DESIGNER'] !== true) {
+    this.scheduleFrameDownload();
+  }
+}
+
+Widget.createSubclass(Camera, {
+  rotation: new Prop(Number),
+  clip: new Prop(Boolean)
+})
+
+Camera.prototype.updatePosition = function (x, y, scaleX, scaleY) {
+  Widget.prototype.updatePosition.call(this, x, y, scaleX, scaleY)
+
+  setTimeout(this.canvas.setSize.bind(this.canvas), 0)
+}
+
+Camera.prototype.applyState = function (state) {
+  Widget.prototype.applyState.call(this, state)
+  this.draw()
+}
+
+Camera.prototype.scheduleFrameDownload = function() {
+  requestAnimationFrame(this.downloadFrame.bind(this))
+}
+
+Camera.prototype.downloadFrame = function() {
+  this.badStatus = false
+
+  var req = new XMLHttpRequest();
+  req.responseType = 'blob';
+  req.timeout = 1000
+
+  req.addEventListener("load", function() {
+    if(req.status !== 200) {
+      this.badStatus = true
+      this.draw()
+      setTimeout(this.scheduleFrameDownload.bind(this), 10000)
+      return;
+    }
+
+    createImageBitmap(req.response)
+      .then(function(bitmap) {
+        if(this.frame !== null) {
+          this.frame.close()
+        }
+        this.frame = bitmap
+        this.draw()
+      }.bind(this))
+  }.bind(this));
+
+  req.addEventListener("loadend", function() {
+    if(!this.badStatus) {
+      this.scheduleFrameDownload()
+    }
+  }.bind(this))
+  
+  req.open("GET", "/extra/camera.jpg");
+  req.send();
+}
+
+Camera.prototype.draw = function() {
+  var ctx = this.canvas.ctx
+  var cw = this.canvas.width
+  var ch = this.canvas.height
+
+  var fw, fh
+  if(this.frame !== null) {
+    fw = this.frame.width
+    fh = this.frame.height
+  } else {
+    fw = 4
+    fh = 3
+  }
+
+  ctx.clearRect(0, 0, cw, ch)
+  ctx.save();
+  ctx.translate(cw/2,ch/2);
+
+  // swap dimensions on rotation
+  if(this.rotation%180 >= 45 && this.rotation%180 < 135) {
+    var t = cw
+    cw = ch
+    ch = t
+  }
+
+  var ratioCanvas = cw / ch
+  var rationFrame = fw / fh
+
+  var scaledW, scaledH
+  if(!this.clip) {
+    if(rationFrame > ratioCanvas) {
+      scaledW = cw
+      scaledH = cw / rationFrame
+    } else {
+      scaledH = ch
+      scaledW = ch * rationFrame
+    }
+  } else {
+    if(rationFrame > ratioCanvas) {
+      scaledH = ch
+      scaledW = ch * rationFrame
+    } else {
+      scaledW = cw
+      scaledH = cw / rationFrame
+    }
+  }
+
+  if(this.frame !== null) {
+    ctx.rotate(this.rotation*Math.PI/180);
+    ctx.drawImage(this.frame, -scaledW/2, -scaledH/2, scaledW, scaledH)
+  } else {
+    ctx.font = "16px serif";
+    ctx.textAlign = "center"
+    if(this.badStatus) {
+      ctx.fillText("No camera present.", 0, 0, Math.min(cw, ch))
+    } else {
+      ctx.fillText("No frame yet.", 0, 0, Math.min(cw, ch))
+    }
+
+    ctx.rotate(this.rotation*Math.PI/180);
+    ctx.strokeStyle = "black";
+    ctx.strokeRect(-scaledW/2, -scaledH/2, scaledW, scaledH)
+  }
+  
+  ctx.restore()
+}
 
 function Checkbox(grid, uuid) {
   this.color = '#000000'
@@ -1454,7 +1657,6 @@ Checkbox.prototype.applyState = function (state) {
 
 Checkbox.prototype.updatePosition = function (x, y, scaleX, scaleY) {
   Widget.prototype.updatePosition.call(this, x, y, scaleX, scaleY)
-
   setTimeout(this.canvas.setSize.bind(this.canvas), 0)
 }
 
@@ -1499,6 +1701,101 @@ Checkbox.prototype.draw = function () {
       side - padding * 2,
       side - padding * 2
     )
+  }
+
+  ctx.restore()
+}
+
+function Circle(grid, uuid) {
+  this.color = '#008000'
+  this.fontSize = 16
+  this.min = 0
+  this.max = 360
+  this.valueStart = 0
+  this.value = 200
+  this.showValue = true
+  this.lineWidth = 10
+
+  var el = document.createElement('canvas')
+  Widget.call(this, grid, uuid, Widget.wrapCanvas(el))
+
+  this.w = 3
+  this.h = 3
+
+  this.canvas = ge1doot.canvas(el)
+  this.canvas.resize = this.draw.bind(this)
+}
+
+Widget.createSubclass(Circle, {
+  color: new Prop(String).setIsColor(),
+  fontSize: new Prop(Number),
+  min: new Prop(Number),
+  max: new Prop(Number),
+  lineWidth: new Prop(Number),
+  valueStart: new Prop(Number),
+  value: new Prop(Number),
+  showValue: new Prop(Boolean)
+})
+
+Circle.prototype.MIN_LIBRARY_VERSION = 0x040700
+
+Circle.prototype.applyState = function (state) {
+  Widget.prototype.applyState.call(this, state)
+  this.draw()
+}
+
+Circle.prototype.updatePosition = function (x, y, scaleX, scaleY) {
+  Widget.prototype.updatePosition.call(this, x, y, scaleX, scaleY)
+  setTimeout(this.canvas.setSize.bind(this.canvas), 0)
+}
+
+Circle.prototype.draw = function () {
+  var ctx = this.canvas.ctx
+  ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+
+  ctx.save()
+
+  var padding = 4 + this.lineWidth / 2
+  var w = this.canvas.width
+  var h = this.canvas.height
+  var arcRadius = Math.max(1, Math.min(w, h) / 2 - padding)
+
+  if (!w || !h) {
+    return
+  }
+
+  var valueStartClipped = Math.max(this.valueStart, this.min)
+  var angleStart =
+    ((valueStartClipped - this.min) / (this.max - this.min)) * Math.PI * 2
+  var angleEnd = ((this.value - this.min) / (this.max - this.min)) * Math.PI * 2
+  // Let's start on top
+  angleStart -= Math.PI / 2
+  angleEnd -= Math.PI / 2
+
+  ctx.lineWidth = this.lineWidth
+
+  ctx.beginPath()
+  ctx.globalAlpha = 0.1
+  ctx.strokeStyle = this.color
+  ctx.arc(w / 2, h / 2, arcRadius, 0, Math.PI * 2)
+  ctx.stroke()
+
+  ctx.globalAlpha = 1
+  ctx.beginPath()
+  ctx.strokeStyle = this.color
+  ctx.arc(w / 2, h / 2, arcRadius, angleStart, angleEnd)
+  ctx.stroke()
+
+  if (this.showValue) {
+    ctx.translate(w / 2, h / 2)
+    ctx.lineWidth = 3
+    ctx.strokeStyle = 'white'
+    ctx.fillStyle = 'black'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.font = this.fontSize + 'px sans-serif'
+    ctx.strokeText('' + this.value, 0, 0)
+    ctx.fillText('' + this.value, 0, 0)
   }
 
   ctx.restore()
@@ -1583,7 +1880,25 @@ Widget.createSubclass(Input, {
   color: new Prop(String, undefined, function (val) {
     this.color = val
     this.input.style.borderColor = val
-  }).setIsColor()
+  }).setIsColor(),
+  type: new Prop(
+    String,
+    function () {
+      return this.input.type
+    },
+    function (val) {
+      this.input.type = val
+    }
+  ).setOptions(['text', 'number', 'password']),
+  disabled: new Prop(
+    Boolean,
+    function () {
+      return this.input.disabled
+    },
+    function (val) {
+      this.input.disabled = !!val
+    }
+  )
 })
 
 function Joystick(grid, uuid) {
@@ -1806,7 +2121,10 @@ Led.prototype.draw = function () {
 function Orientation(grid, uuid) {
   this.color = '#FF0000'
 
-  if (window['RbGravitySensor'] === undefined) {
+  if (
+    window['RbGravitySensor'] === undefined &&
+    window['IN_RB_GRID_DESIGNER'] !== true
+  ) {
     this.enabled = false
     this.canvas = null
 
@@ -1815,16 +2133,20 @@ function Orientation(grid, uuid) {
       'Orientation sensor requires the Android RBController app, version >= 1.9.'
     Widget.call(this, grid, uuid, el)
   } else {
-    this.enabled = true
-    RbGravitySensor.start()
+    this.enabled = window['IN_RB_GRID_DESIGNER'] !== true
 
     var el = document.createElement('canvas')
     Widget.call(this, grid, uuid, Widget.wrapCanvas(el))
     this.canvas = ge1doot.canvas(el)
     this.canvas.resize = this.draw.bind(this)
-  }
 
-  this.MIN_LIBRARY_VERSION = 0x040200
+    if (this.enabled) {
+      RbGravitySensor.start()
+    } else {
+      this.demoRollDelta = 0.02
+      requestAnimationFrame(this.doGridDesignerDemo.bind(this))
+    }
+  }
 
   this.w = 1
   this.h = 1
@@ -1837,6 +2159,8 @@ Widget.createSubclass(Orientation, {
   color: new Prop(String).setIsColor()
 })
 
+Orientation.prototype.MIN_LIBRARY_VERSION = 0x040200
+
 Orientation.prototype.applyState = function (state) {
   Widget.prototype.applyState.call(this, state)
   this.draw()
@@ -1846,6 +2170,18 @@ Orientation.prototype.updatePosition = function (x, y, scaleX, scaleY) {
   Widget.prototype.updatePosition.call(this, x, y, scaleX, scaleY)
 
   if (this.canvas !== null) setTimeout(this.canvas.setSize.bind(this.canvas), 0)
+}
+
+Orientation.prototype.doGridDesignerDemo = function () {
+  if (!this.canvas.elem.isConnected) {
+    return
+  }
+  this.roll += this.demoRollDelta
+  if (this.roll > 1 || this.roll < -1) {
+    this.demoRollDelta *= -1
+  }
+  this.draw()
+  requestAnimationFrame(this.doGridDesignerDemo.bind(this))
 }
 
 Orientation.prototype.draw = function () {
@@ -1878,7 +2214,9 @@ Orientation.prototype.draw = function () {
 }
 
 Orientation.prototype.update = function () {
-  if (this.enabled === false) return
+  if (this.enabled === false) {
+    return
+  }
 
   this.yaw = RbGravitySensor.getYaw()
   this.pitch = RbGravitySensor.getPitch()
@@ -1895,6 +2233,87 @@ Orientation.prototype.update = function () {
   )
   this.draw()
 }
+
+function Select(grid, uuid) {
+  var el = document.createElement('select')
+  el.style.display = 'flex'
+
+  Widget.call(this, grid, uuid, el)
+
+  this.w = 3
+  this.h = 1
+
+  this.el.selectedIndex = this.selectedIndex = 0
+  this.options = "None"
+  this.el.add(new Option("None", "0"))
+
+  this.color = '#000000'
+  this.background = ''
+
+  this.el.addEventListener(
+    'change',
+    function () {
+      this.sendEvent('changed', { value: this.selectedIndex })
+    }.bind(this)
+  )
+}
+
+Widget.createSubclass(Select, {
+  color: new Prop(String, undefined, function (val) {
+    this.color = val
+    this.el.style.color = val
+  }).setIsColor(),
+  background: new Prop(String, undefined, function (val) {
+    this.background = val
+    this.el.style.backgroundColor = val
+  }).setIsColor(),
+  disabled: new Prop(
+    Boolean,
+    function () {
+      return this.el.disabled
+    },
+    function (val) {
+      this.el.disabled = !!val
+    }
+  ),
+  options: new Prop(
+    String,
+    function () {
+      const opts = Array(this.el.length)
+
+      for (let i = 0; i < this.el.length; i++) {
+        opts[this.el[i].value] = this.el[i].text
+      }
+
+      return opts.join(',')
+    },
+
+    function (val) {
+      if (!val) val = "None"
+      while (this.el.length > 0) {
+        this.el.remove(0)
+      }
+
+      const newOpts = val.split(",")
+      for (let index = 0; index < newOpts.length; index++) {
+        this.el.add(new Option(newOpts[index], index))
+      }
+
+      this.options = val
+    }
+  ),
+  selectedIndex: new Prop(
+    Number,
+    function () {
+      return this.el.selectedIndex
+    },
+    function (val) {
+      this.el.selectedIndex = val
+    }
+  ),
+})
+
+Select.prototype.MIN_LIBRARY_VERSION = 0x040800
 
 function Slider(grid, uuid) {
   this.PADDING_FRAC = 0.03
@@ -2053,6 +2472,255 @@ Slider.prototype.draw = function () {
   ctx.restore()
 }
 
+function SpinEdit(grid, uuid) {
+  this.color = '#000000'
+  this.fontSize = 14
+  this.value = 0
+  this.step = 1
+  this.precision = 1
+
+  var el = document.createElement('canvas')
+  Widget.call(this, grid, uuid, Widget.wrapCanvas(el))
+
+  this.w = 4
+  this.h = 1
+
+  this.canvas = ge1doot.canvas(el)
+  this.canvas.resize = this.draw.bind(this)
+  this.canvas.pointer.up = function () {
+    const part = this.canvas.width / 4
+    if (this.canvas.pointer.x < part) {
+      this.value -= this.step
+    } else if (this.canvas.pointer.x > part * 3) {
+      this.value += this.step
+    } else {
+      return
+    }
+
+    this.sendEvent('changed', { value: this.value })
+    this.draw()
+  }.bind(this)
+}
+
+Widget.createSubclass(SpinEdit, {
+  fontSize: new Prop(Number),
+  color: new Prop(String).setIsColor(),
+  value: new Prop(Number),
+  step: new Prop(Number),
+  precision: new Prop(Number)
+})
+
+SpinEdit.prototype.MIN_LIBRARY_VERSION = 0x040600
+
+SpinEdit.prototype.applyState = function (state) {
+  Widget.prototype.applyState.call(this, state)
+  this.draw()
+}
+
+SpinEdit.prototype.updatePosition = function (x, y, scaleX, scaleY) {
+  Widget.prototype.updatePosition.call(this, x, y, scaleX, scaleY)
+
+  setTimeout(this.canvas.setSize.bind(this.canvas), 0)
+}
+
+SpinEdit.prototype.formatValue = function (value, precision) {
+  var pStr = '' + precision
+  var idx = pStr.indexOf('.')
+  var decimals = 0
+  if (idx !== -1) {
+    decimals = pStr.length - (idx + 1)
+  }
+  return value.toFixed(decimals)
+}
+
+SpinEdit.prototype.draw = function () {
+  var ctx = this.canvas.ctx
+  ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+
+  const part = this.canvas.width / 4
+  const padding = part * 0.2
+
+  ctx.lineWidth = Math.max(2, this.canvas.height * 0.05)
+  ctx.fillStyle = this.color
+  ctx.strokeStyle = this.color
+
+  // minus
+  ctx.strokeRect(padding, this.canvas.height / 2, part - padding * 2, 1)
+
+  // plus
+  ctx.save()
+  ctx.translate(part * 3, 0)
+  const minusW = part - padding * 2
+  ctx.strokeRect(padding, this.canvas.height / 2, minusW, 1)
+  ctx.strokeRect(part / 2, this.canvas.height / 2 - minusW / 2, 1, minusW)
+  ctx.restore()
+
+  // text
+  ctx.save()
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.font = this.fontSize + 'px sans-serif'
+  ctx.fillText(
+    this.formatValue(this.value, this.precision),
+    this.canvas.width / 2,
+    this.canvas.height / 2
+  )
+  ctx.restore()
+}
+
+function Switcher(grid, uuid) {
+  this.color = '#000000'
+  this.fontSize = 14
+  this.value = 0
+  this.__switcher = true
+  this.grid = grid
+
+  var el = document.createElement('div')
+  Widget.call(this, grid, uuid, el)
+
+  var canvas = document.createElement('canvas')
+  canvas.style.width = '100%'
+  canvas.style.height = '100%'
+
+  this.input = document.createElement('input')
+  this.input.type = 'text'
+  this.input.style.all = 'revert'
+  this.input.style.height = '100%'
+  this.input.style.borderWidth = '2px'
+  this.input.style.boxSizing = 'border-box'
+  this.input.style.borderColor = '#cccccc'
+  this.input.style.position = 'absolute'
+
+  el.appendChild(canvas)
+  el.appendChild(this.input)
+
+  this.w = 4
+  this.h = 1
+
+  this.canvas = ge1doot.canvas(canvas)
+  this.canvas.resize = this.draw.bind(this)
+  this.canvas.pointer.up = function () {
+    var bounds = this.el.getBoundingClientRect()
+    const width = bounds.width
+    const height = bounds.height
+    const part = width >= 3 * height
+      ? height
+      : this.canvas.width / 4
+    const inputWidth = width >= 3 * height
+      ? (width - 2 * height)
+      : width / 2
+    if (this.canvas.pointer.x < part) {
+      this.value -= 1
+      if (this.value < this.min)
+        this.value = this.min
+    } else if (this.canvas.pointer.x > part + inputWidth) {
+      this.value += 1
+      if (this.value > this.max)
+        this.value = this.max
+    } else {
+      return
+    }
+
+    this.sendEvent('changed', { value: this.value })
+    this.draw()
+  }.bind(this)
+
+  this.input.addEventListener(
+    'change',
+    function () {
+      const val = parseInt(this.input.value, 10)
+      if (val < this.min)
+        val = this.min
+      else if (val > min(this.max, this.grid.tabs.length))
+        val = min(this.max, this.grid.tabs.length)
+      this.value = val
+      this.draw()
+      this.sendEvent('changed', { value: this.value })
+    }.bind(this)
+  )
+}
+
+Widget.createSubclass(Switcher, {
+  fontSize: new Prop(Number),
+  color: new Prop(String).setIsColor(),
+  value: new Prop(Number),
+  min: new Prop(Number),
+  max: new Prop(Number)
+})
+
+Switcher.prototype.MIN_LIBRARY_VERSION = 0x040A00
+
+Switcher.prototype.applyState = function (state) {
+  Widget.prototype.applyState.call(this, state)
+  this.draw()
+}
+
+Switcher.prototype.updatePosition = function (x, y, scaleX, scaleY) {
+  Widget.prototype.updatePosition.call(this, x, y, scaleX, scaleY)
+
+  setTimeout(this.canvas.setSize.bind(this.canvas), 0)
+}
+
+Switcher.prototype.formatValue = function (value, precision) {
+  var pStr = '' + precision
+  var idx = pStr.indexOf('.')
+  var decimals = 0
+  if (idx !== -1) {
+    decimals = pStr.length - (idx + 1)
+  }
+  return value.toFixed(decimals)
+}
+
+Switcher.prototype.draw = function () {
+  var bounds = this.el.getBoundingClientRect()
+  const width = bounds.width
+  const height = bounds.height
+
+  var ctx = this.canvas.ctx
+
+  const inputWidth = width >= 3 * height
+    ? (width - 2 * height)
+    : width / 2
+
+  const part = width >= 3 * height
+    ? height
+    : this.canvas.width / 4
+
+  let padding = part * 0.2
+
+  this.input.style.width = inputWidth + 'px'
+  this.input.style.left = part + 'px'
+  this.input.value = this.value.toString()
+
+  ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+
+  ctx.lineWidth = Math.max(2, this.canvas.height * 0.05)
+  ctx.fillStyle = this.color
+  ctx.strokeStyle = this.color
+
+  // left
+  ctx.save()
+  ctx.translate(padding, this.canvas.height / 2)
+  ctx.beginPath()
+  ctx.moveTo(0, 0)
+  ctx.lineTo(part - padding * 2, this.canvas.height / 4)
+  ctx.moveTo(0, 0)
+  ctx.lineTo(part - padding * 2, - this.canvas.height / 4)
+  ctx.stroke()
+  ctx.restore()
+
+  // right
+  ctx.save()
+  ctx.translate(this.canvas.width - padding, this.canvas.height / 2)
+  ctx.beginPath()
+  ctx.moveTo(padding * 2 - part, this.canvas.height / 4)
+  ctx.lineTo(0, 0)
+  ctx.moveTo(padding * 2 - part, - this.canvas.height / 4)
+  ctx.lineTo(0, 0)
+  ctx.stroke()
+  ctx.restore()
+}
+
 function Text(grid, uuid) {
   var el = document.createElement('div')
   el.style.display = 'flex'
@@ -2060,9 +2728,9 @@ function Text(grid, uuid) {
   this.span = document.createElement('span')
   el.appendChild(this.span)
 
-  this.text = "Text"
-  this.prefix = ""
-  this.suffix = ""
+  this.text = 'Text'
+  this.prefix = ''
+  this.suffix = ''
   this.updateContent()
 
   Widget.call(this, grid, uuid, el)
@@ -2077,16 +2745,14 @@ function Text(grid, uuid) {
   this.span.style.fontSize = this.fontSize + 'pt'
 
   this.color = '#000000'
+  this.background = ''
 }
 
 Widget.createSubclass(Text, {
-  text: new Prop(
-    String, undefined,
-    function (val) {
-      this.text = val
-      this.updateContent()
-    }
-  ),
+  text: new Prop(String, undefined, function (val) {
+    this.text = val
+    this.updateContent()
+  }),
   fontSize: new Prop(Number, undefined, function (val) {
     this.fontSize = val
     this.span.style.fontSize = val + 'pt'
@@ -2094,6 +2760,10 @@ Widget.createSubclass(Text, {
   color: new Prop(String, undefined, function (val) {
     this.color = val
     this.span.style.color = val
+  }).setIsColor(),
+  background: new Prop(String, undefined, function (val) {
+    this.background = val
+    this.el.style.backgroundColor = val
   }).setIsColor(),
   align: new Prop(String, undefined, function (val) {
     this.align = val
@@ -2103,17 +2773,17 @@ Widget.createSubclass(Text, {
     this.valign = val
     this.el.style.alignItems = val
   }).setOptions(['flex-start', 'center', 'flex-end']),
-  prefix: new Prop(String, undefined, function(val) {
+  prefix: new Prop(String, undefined, function (val) {
     this.prefix = val
     this.updateContent()
   }),
-  suffix: new Prop(String, undefined, function(val) {
+  suffix: new Prop(String, undefined, function (val) {
     this.suffix = val
     this.updateContent()
-  }),
+  })
 })
 
-Widget.prototype.updateContent = function() {
+Widget.prototype.updateContent = function () {
   this.span.innerHTML = this.prefix + this.text + this.suffix
 }
 
@@ -2125,7 +2795,13 @@ function Grid(manager, elementId, data) {
 
   this.canvas = document.createElement('canvas')
   this.canvas.style.position = 'absolute'
+  this.canvas.style.top = '0px'
   this.el.appendChild(this.canvas)
+
+  this.tabs = []
+  this.currentTabIdx = 0
+  this.setTabCount(1)
+  this.setCurrentTab(0)
 
   window.addEventListener('resize', this.onResize.bind(this))
 
@@ -2150,6 +2826,49 @@ function Grid(manager, elementId, data) {
   this.scaleY = 1
 
   this.reset(data)
+}
+
+Grid.prototype.setCurrentTab = function (idx) {
+  this.tabs[this.currentTabIdx].style.display = 'none'
+  this.tabs[idx].style.display = 'block'
+  this.currentTabIdx = idx
+  for (w of this.widgets) {
+    if (w instanceof Switcher)
+      w.value = idx
+    w.applyState(w.getState())
+  }
+}
+
+Grid.prototype.moveToTab = function (widget, tab, oldTab) {
+  widget.tab = oldTab
+  this.removeWidget(widget)
+  widget.tab = tab
+  this.addWidgetConstructed(widget)
+}
+
+Grid.prototype.setTabCount = function (count) {
+  if (this.tabs.length === count || count <= 0) {
+    return
+  }
+
+  if (this.tabs.length < count) {
+    for (var i = this.tabs.length; i < count; ++i) {
+      var t = document.createElement('div')
+      t.style.width = '100%'
+      t.style.height = '100%'
+      t.style.display = 'none'
+      this.el.appendChild(t) 
+      this.tabs[i] = t
+    }
+  } else {
+    while (this.tabs.length > count) {
+      var t = this.tabs.pop()
+      this.el.removeChild(t)
+    }
+    if (this.currentTabIdx >= this.tabs.length) {
+      this.currentTabIdx = this.tabs.length - 1
+    }
+  }
 }
 
 Grid.prototype.reset = function (data) {
@@ -2286,7 +3005,10 @@ Grid.prototype.addWidgetConstructed = function (widget) {
   widget.updatePosition()
   widget.setEventListener(this.onWidgetEvent.bind(this))
 
-  this.el.appendChild(widget.el)
+  
+  if (this.tabs.length <= widget.tab) 
+    this.setTabCount(widget.tab + 1)
+  this.tabs[widget.tab].appendChild(widget.el)
   this.widgets.push(widget)
 }
 
@@ -2294,7 +3016,7 @@ Grid.prototype.removeWidget = function (widget) {
   var idx = this.widgets.indexOf(widget)
   if (idx === -1) return false
 
-  this.el.removeChild(widget.el)
+  this.tabs[widget.tab].removeChild(widget.el)
   this.widgets.splice(idx, 1)
   return true
 }
@@ -2303,9 +3025,10 @@ Grid.prototype.clear = function () {
   var len = this.widgets.length
   for (var i = 0; i < len; ++i) {
     var w = this.widgets[i]
-    this.el.removeChild(w.el)
+    this.tabs[w.tab].removeChild(w.el)
   }
   this.widgets = []
+  this.setTabCount(1)
 }
 
 Grid.prototype.onWidgetEvent = function (w, name, extra, mustArrive, callback) {

@@ -59,7 +59,7 @@ void iopins_init(void)
     gpio_config_t io_conf;
     io_conf.intr_type = GPIO_INTR_DISABLE;
     io_conf.mode = GPIO_MODE_OUTPUT;
-    io_conf.pin_bit_mask = GPIO_OUTPUT_PIN_SEL;
+    io_conf.pin_bit_mask = ((1ULL<<VCC_IO));
     io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
     io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
     gpio_config(&io_conf);
@@ -154,9 +154,8 @@ void pulse(void*pvParameters){
     while (1) {
         /* Wait for the event information passed from PCNT's interrupt handler.
          * Once received, decode the event type and print it on the serial monitor.
-         */
-        //res = res == pdTRUE
-        if (xQueueReceive(pcnt_evt_queue, &evt, 1000 / portTICK_PERIOD_MS)) {
+         */ 
+        if (xQueueReceive(pcnt_evt_queue, &evt, portMAX_DELAY)) {
             pcnt_get_counter_value(static_cast<pcnt_unit_t>(evt.unit), &count[evt.unit]);
             printf("Event PCNT unit[%d] count: %d\n", evt.unit,count[evt.unit]);
             if (evt.status & PCNT_STATUS_H_LIM_M) {

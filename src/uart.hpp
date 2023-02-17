@@ -3,6 +3,7 @@
 #include "driver/uart.h"
 #include "soc/uart_struct.h"
 
+
 class Uart {
     Uart() = delete;
     Uart(const Uart&) = delete;
@@ -53,14 +54,14 @@ public:
     int write (uint8_t v) {
         return write(&v, 1);
     }
-    size_t available() {
+    size_t available() {    //podmínka
         MutexGuard guard {m_mutex};
         guard.acquire();
         size_t ret = 0;
         ESP_ERROR_CHECK(uart_get_buffered_data_len(m_port, &ret));
         return ret;
     }
-    int read(TickType_t timeout = portMAX_DELAY) {
+    int read(TickType_t timeout = portMAX_DELAY) { //čtení
         MutexGuard guard {m_mutex};
         guard.acquire();
         uint8_t v = 0;
@@ -91,3 +92,4 @@ private:
     const uart_port_t m_port;
     SemaphoreHandle_t m_mutex;
 };
+

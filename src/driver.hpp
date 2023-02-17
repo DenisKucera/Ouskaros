@@ -58,14 +58,14 @@ public:
         return _write(0x00, index);
     }
 
-    bool set_speed(int speed) {
+    bool set_speed(int driver_speed) {
         int16_t count[4]={0,0,0,0};
-        if((speed<0) & gpio_get_level(SILOVKA)){
+        if((driver_speed<0) & !gpio_get_level(SILOVKA)){
             pcnt_get_counter_value(c_unit, &count[c_unit]);
             pcnt_set_mode(c_unit,PCNT_CHANNEL_0,PCNT_COUNT_DEC,PCNT_COUNT_DIS,PCNT_MODE_KEEP,PCNT_MODE_KEEP);
             //printf("Pocet pulzu motoru%d: %d\n",c_unit,count[c_unit]);
         }
-        else if((speed>0) & gpio_get_level(SILOVKA)){
+        else if((driver_speed>0) & !gpio_get_level(SILOVKA)){
             pcnt_get_counter_value(c_unit, &count[c_unit]);
             pcnt_set_mode(c_unit,PCNT_CHANNEL_0,PCNT_COUNT_INC,PCNT_COUNT_DIS,PCNT_MODE_KEEP,PCNT_MODE_KEEP);
             //printf("Pocet pulzu motoru%d: %d\n",c_unit,count[c_unit]);
@@ -75,7 +75,7 @@ public:
             pcnt_set_mode(c_unit,PCNT_CHANNEL_0,PCNT_COUNT_DIS,PCNT_COUNT_DIS,PCNT_MODE_DISABLE,PCNT_MODE_DISABLE);
             //printf("Pocet pulzu motoru%d: %d\n",c_unit,count[c_unit]);
         }
-        return _write(0x22, speed); //Moving the motor by UART control.
+        return _write(0x22, driver_speed); //Moving the motor by UART control.
     }
     int read_tstep(uint32_t& read) {
         return _read(0x12, read); //Actual measured time between two microsteps

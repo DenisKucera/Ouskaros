@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "random": "cpp",
+        "*.tcc": "cpp",
+        "typeinfo": "cpp",
+        "istream": "cpp",
+        "chrono": "cpp",
+        "ratio": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}

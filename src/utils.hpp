@@ -14,15 +14,58 @@
 #include "driver/pcnt.h"
 #include "esp_attr.h"
 #include "soc/gpio_sig_map.h"
+//#include "protocol_examples_common.h"
+#include "esp_err.h"
+#include "esp_vfs_dev.h"
+#include "driver/uart.h"
+#include "sdkconfig.h"
 #include <atomic>
 
 using namespace std;
 
-void silovka(void*pvParameters){
+void step_pulse_init(const uint32_t freq_hz, const ledc_timer_t timer_num, const gpio_num_t ledc_output, const ledc_channel_t channel)
+{
+    // Prepare and then apply the LEDC PWM timer configuration
+    periph_module_enable(PERIPH_LEDC_MODULE);
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode       = LEDC_HIGH_SPEED_MODE,
+        .duty_resolution  = LEDC_TIMER_8_BIT,
+        .timer_num        = timer_num,
+        .freq_hz          = freq_hz,  // set output frequency
+        .clk_cfg = LEDC_AUTO_CLK,
+    };
+    ledc_timer_config(&ledc_timer);
+    // Prepare and then apply the LEDC PWM channel configuration
+    ledc_channel_config_t ledc_channel = {
+        .gpio_num   = ledc_output,
+        .speed_mode = LEDC_HIGH_SPEED_MODE,
+        .channel    = channel,
+        .intr_type  = LEDC_INTR_FADE_END,
+        .timer_sel  = timer_num,
+        .duty       = 128, // set duty at about 50%
+        .hpoint     = 0,
+    };    
+    ledc_channel_config(&ledc_channel);
+}
+
+////////////////////////BUZZER INIT//////////////////////////
+   void beep(uint beeps,uint delay, uint freq){
+        step_pulse_init(freq,LEDC_TIMER_0,BUZZER,LEDC_CHANNEL_0);
+        for(int i=0; i<beeps; i++){
+            ledc_timer_pause(LEDC_HIGH_SPEED_MODE,LEDC_TIMER_0);
+            vTaskDelay(delay / portTICK_PERIOD_MS);
+            ledc_timer_resume(LEDC_HIGH_SPEED_MODE,LEDC_TIMER_0);
+            vTaskDelay(delay / portTICK_PERIOD_MS);
+        } 
+        ledc_timer_pause(LEDC_HIGH_SPEED_MODE,LEDC_TIMER_0);
+   }
+
+/*void silovka(void*pvParameters){
     while(1){
-        if(gpio_get_level(SILOVKA) != driver_stdby){
+        if(!gpio_get_level(SILOVKA) != driver_stdby){
             if((!driver_stdby) == 1){ 
-                printf("Připojeno 12V:\n");
+                printf("Pripojeno 12V:\n");
+                beep(1, 1000, 1800);
                 esp_restart();
             }
             else{
@@ -32,8 +75,42 @@ void silovka(void*pvParameters){
         }
         vTaskDelay(10 / portTICK_PERIOD_MS);
         }
+    }*/
+
+static QueueHandle_t switch_evt_queue = NULL;
+
+static void IRAM_ATTR switch_intr_isr(void *arg)
+{
+    int pinNumber = (int) arg;
+    xQueueSendFromISR(switch_evt_queue, &pinNumber, NULL);
+}
+
+void switch_control_task(void *param)
+{
+    switch_evt_queue = xQueueCreate(1, sizeof(int));
+    int pinNumber, count = 0, curr_count=0;
+    while (xQueueReceive(switch_evt_queue, &pinNumber, portMAX_DELAY))
+    {
+        count++;
+        if(count==curr_count+2){
+            count=curr_count;
+            gpio_set_level(LED, 1);
+            beep(2, 300, 1800);
+            esp_restart();
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+        }
+        else{
+            printf("GPIO %d was pressed %d times. The state is %d\n", pinNumber, count, gpio_get_level(ON_OFF_SWITCH));
+            gpio_set_level(LED, 0);
+            beep(1, 1000, 1800);
+            curr_count=count;
+            count++;
+            power_on_off=false;
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+        }
     }
-//gpio_isr_handle_t gpio_intr_handle = NULL;
+}    
+
 static QueueHandle_t gpio_evt_queue = NULL;   // A queue to handle pulse counter events
 
 static void IRAM_ATTR gpio_intr_isr(void* arg)
@@ -47,19 +124,19 @@ void gpio_control_task(void* arg){
     while(xQueueReceive(gpio_evt_queue, &io_num, portMAX_DELAY)){
         switch(io_num){
             case 19:
-            motor_speed[3] = 0;
+            //motor_speed[3] = 0;
             printf("motor3 stalled!!!\n");
             break;
             case 21:
-            motor_speed[2] = 0;    
+            //motor_speed[2] = 0;    
             printf("motor2 stalled!!!\n");
             break;
             case 22:
-            motor_speed[1] = 0;    
+            //motor_speed[1] = 0;    
             printf("motor1 stalled!!!\n");
             break;
             case 23:
-            motor_speed[0] = 0;    
+            //motor_speed[0] = 0;    
             printf("motor0 stalled!!!\n");
             break;
         }
@@ -108,30 +185,6 @@ esp_reset_reason_t check_reset() {
         break;
     }
     return resetReason;
-}
-void step_pulse_init(const uint32_t freq_hz, const ledc_timer_t timer_num, const gpio_num_t ledc_output, const ledc_channel_t channel)
-{
-    // Prepare and then apply the LEDC PWM timer configuration
-    periph_module_enable(PERIPH_LEDC_MODULE);
-    ledc_timer_config_t ledc_timer = {
-        .speed_mode       = LEDC_HIGH_SPEED_MODE,
-        .duty_resolution  = LEDC_TIMER_8_BIT,
-        .timer_num        = timer_num,
-        .freq_hz          = freq_hz,  // set output frequency at 10000 Hz
-        .clk_cfg = LEDC_AUTO_CLK,
-    };
-    ledc_timer_config(&ledc_timer);
-    // Prepare and then apply the LEDC PWM channel configuration
-    ledc_channel_config_t ledc_channel = {
-        .gpio_num   = ledc_output,
-        .speed_mode = LEDC_HIGH_SPEED_MODE,
-        .channel    = channel,
-        .intr_type  = LEDC_INTR_FADE_END,
-        .timer_sel  = timer_num,
-        .duty       = 128, // set duty at about 50%
-        .hpoint     = 0,
-    };    
-    ledc_channel_config(&ledc_channel);
 }
 
 class MutexGuard {
